@@ -4,18 +4,13 @@ local util = require("util")
 --- @param ctx table Empty table used as context, for future extension
 --- @return table Descriptions of available versions and accompanying tool descriptions
 function PLUGIN:Available(ctx)
-    util:DoSomeThing()
-    local runtimeVersion = ctx.runtimeVersion
-    return {
-        {
-            version = "xxxx",
-            note = "LTS",
-            addition = {
-                {
-                    name = "npm",
-                    version = "8.8.8",
-                }
-            }
-        }
-    }
+    local m4 = util:parseVersion("maven-4/")
+    local m3 = util:parseVersion("maven-3/")
+    for _, v in ipairs(m3) do
+        table.insert(m4, v)
+    end
+    table.sort(m4, function(a, b)
+        return a.version > b.version
+    end)
+    return m4
 end
