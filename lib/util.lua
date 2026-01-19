@@ -3,9 +3,9 @@ local http = require("http")
 local util = {}
 
 
-util.MAVEN_URL = "https://archive.apache.org/dist/maven/"
-util.FILE_URL = "https://archive.apache.org/dist/maven/maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz"
-util.CHECKSUM_URL = "https://archive.apache.org/dist/maven/maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz.%s"
+util.MAVEN_URL = "https://dlcdn.apache.org/maven/"
+util.FILE_URL = "https://dlcdn.apache.org/maven/maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz"
+util.CHECKSUM_URL = "https://dlcdn.apache.org/maven/maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz.%s"
 
 function util:parseVersion(path)
     local resp, err = http.get({
