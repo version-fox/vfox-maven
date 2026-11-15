@@ -6,7 +6,7 @@ The offline tests cannot tell whether vfox installs a real Maven, so the end-to-
 
 ## What it checks
 
-For the newest Maven 4 and Maven 3 releases that `vfox search maven` lists, and for three archived releases, Maven 3.0.5, Maven 2.2.1 and Maven 1.1:
+For the newest Maven 4 and Maven 3 releases that `vfox search maven` lists, and for four archived releases, Maven 3.0.5, Maven 2.2.1, Maven 2.0.11 and Maven 1.1:
 
 1. `vfox add maven --source` adds the plugin, packed from the checkout (`metadata.lua`, `hooks` and `lib`), and `vfox search maven` lists the archived releases;
 2. `vfox install` installs the release, and its output shows that vfox verified the checksum;
@@ -74,5 +74,5 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 
 ## Known gaps
 
-- The check installs the newest Maven 3 and Maven 4 releases and the three archived ones, not every release that `vfox search` lists.
+- The check installs the newest Maven 3 and Maven 4 releases and the four archived ones, not every release that `vfox search` lists.
 - On Windows arm64, Maven 1.1 runs on the x64 JDK 8 under emulation, because Temurin publishes no JDK 8 for that platform.

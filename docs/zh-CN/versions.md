@@ -20,7 +20,7 @@ vfox install maven@3.10.1
 vfox install maven@3.0.5
 ```
 
-如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。Maven 2 到 4 的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`。
+如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。Maven 2 到 4 的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`，只有一个例外。Maven 2.0.11 安装的是 `apache-maven-2.0.11-bin.zip`，因为它的 `tar.gz` 里有一个多余的零块，vfox 的解包会拒绝它。
 
 ## 使用某个版本
 

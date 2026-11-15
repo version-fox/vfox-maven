@@ -20,7 +20,7 @@ vfox install maven@3.10.1
 vfox install maven@3.0.5
 ```
 
-The archive comes from dlcdn.apache.org when that lists the release, and from archive.apache.org otherwise. Maven 2 to 4 lay out their archives the same way: `maven-<major>/<version>/binaries/apache-maven-<version>-bin.tar.gz`.
+The archive comes from dlcdn.apache.org when that lists the release, and from archive.apache.org otherwise. Maven 2 to 4 lay out their archives the same way: `maven-<major>/<version>/binaries/apache-maven-<version>-bin.tar.gz`, with one exception. Maven 2.0.11 is installed from its `apache-maven-2.0.11-bin.zip`, because its `tar.gz` has a stray zero block that vfox's unpacker rejects.
 
 ## Using a version
 
