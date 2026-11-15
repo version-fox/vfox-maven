@@ -10,8 +10,16 @@
 
 1. `vfox add maven --source` 加入插件（从仓库打包 `metadata.lua`、`hooks` 和 `lib`），`vfox search maven` 列出归档版本；
 2. `vfox install` 安装版本，输出显示 vfox 核对了校验和；
-3. `vfox info` 给出安装目录，版本自带的启动脚本（`mvn`，Maven 1 是 `maven`）能运行并报告该版本；
+3. `vfox use --global` 选中版本：在已激活 vfox 的 shell 里，Maven 命令（`mvn`，Maven 1 是 `maven`）解析到该版本，报告该版本并能运行；
 4. 插件的 EnvKeys 钩子通过 `vfox plugin run` 运行，把该版本的 bin 目录放进 `PATH`。
+
+然后是三个场景，检查 `vfox use` 的其他作用域：
+
+- 为会话选中的版本（`vfox use`）覆盖全局选择，会话随 shell 结束；
+- `vfox use --project` 为项目目录选中版本，写入 `.vfox.toml`，项目之外仍然使用全局选择；
+- `vfox use` 只写大版本号（`maven@3`）时，选中已安装的该大版本的最新版本。
+
+`vfox use` 只在已激活 vfox 的 shell 里生效，就像用户的 shell 那样，所以场景在这样的 shell 里运行：Linux 和 macOS 用 bash，Windows 用 PowerShell 7。脚本依次执行 `vfox activate`、`vfox use`、`vfox env`（脚本不会触发应用 `vfox env` 的提示符钩子），然后运行 Maven 命令。`VFOX_MAVEN_SHELL`（`bash` 或 `pwsh`）可以覆盖这个选择，因此 PowerShell 的路径也能在 Linux 上运行。这些 shell 的环境里会去掉 vfox 会话的变量（`__VFOX_*`），因此不会继承启动检查的那个 shell 的会话。
 
 测试使用自己的家目录（`HOME` 和 `USERPROFILE` 都指向临时目录），因此机器上 vfox 的缓存和全局选择不会被改动。
 
@@ -20,6 +28,7 @@
 - `PATH` 上的 vfox 1.1.0。
 - Maven 2 到 4 用的 Java 运行时，即默认的 JDK。
 - `VFOX_MAVEN_JAVA8_HOME`：一个带 `lib/tools.jar` 的 JDK 8，给 Maven 1.1 用。它的启动脚本会传 `-Djava.endorsed.dirs`，JDK 9 及以后拒绝这个选项，所以 Maven 1 只能在 JDK 8 上运行。
+- Linux 和 macOS 上的 bash，Windows 上的 PowerShell 7（`pwsh`）。
 - 网络，用于访问 Apache 的服务器。
 
 `VFOX_MAVEN_PLUGIN_DIR` 指定插件的仓库目录，默认是存放这个测试的仓库。
@@ -41,7 +50,7 @@ go test -short ./...
 ## 在 CI 中
 
 - `e2e.yml`，Linux：用 `go test -c` 为运行器的架构编译检查，然后在端到端镜像（`tests/e2e/Dockerfile`）里运行，仓库以只读方式挂载。运行器是 `ubuntu-latest`（amd64）和 `ubuntu-26.04-arm`（arm64）。
-- `e2e.yml`，Windows：检查直接在 `windows-latest` 上运行。`setup-java` 安装一个给 Maven 1.1 用的 JDK 8，和作为默认的 JDK 21。
+- `e2e.yml`，Windows：检查直接在 `windows-latest` 上运行，使用 PowerShell 7。`setup-java` 安装一个给 Maven 1.1 用的 JDK 8，和作为默认的 JDK 21。
 - `lint.yml`：对 Go 代码运行 `gofmt`、`go vet` 和 `go test -short`。
 
 ## 开发容器
@@ -65,3 +74,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 ## 已知的限制
 
 - 检查只安装最新的 Maven 3 和 Maven 4 版本，以及三个归档版本，而不是 `vfox search` 列出的每一个版本。
+- 场景使用插件默认的 `PreUse`，它什么也不做：版本的匹配由 vfox 负责。

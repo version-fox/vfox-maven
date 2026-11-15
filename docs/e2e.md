@@ -10,8 +10,16 @@ For the newest Maven 4 and Maven 3 releases that `vfox search maven` lists, and 
 
 1. `vfox add maven --source` adds the plugin, packed from the checkout (`metadata.lua`, `hooks` and `lib`), and `vfox search maven` lists the archived releases;
 2. `vfox install` installs the release, and its output shows that vfox verified the checksum;
-3. `vfox info` gives the install directory, and the launcher that the release ships (`mvn`, or `maven` for Maven 1) runs and reports the release;
+3. `vfox use --global` selects the release: in a shell with vfox activated, the Maven command (`mvn`, or `maven` for Maven 1) resolves to the release, reports it, and runs it;
 4. the EnvKeys hook of the plugin, run through `vfox plugin run`, puts the bin directory of the release on `PATH`.
+
+Three scenarios then check the other scopes of `vfox use`:
+
+- a release selected for the session (`vfox use`) wins over the global selection, and the session ends with its shell;
+- `vfox use --project` selects a release for a project directory, in its `.vfox.toml`, and the global selection still applies outside that directory;
+- `vfox use` with a major version alone (`maven@3`) selects the newest installed release of that major version.
+
+`vfox use` takes effect only in a shell that has vfox activated, as a user's shell has it, so the scenarios run in one: bash on Linux and macOS, and PowerShell 7 on Windows. The script runs `vfox activate`, then `vfox use`, then `vfox env`, because a script does not run the prompt hook that applies `vfox env`, and then the Maven command. `VFOX_MAVEN_SHELL` (`bash` or `pwsh`) overrides the choice, so the PowerShell path can run on Linux. The variables of a vfox session (`__VFOX_*`) are removed from the environment of these shells, so a session of the shell that starts the check is not inherited.
 
 The run has a HOME of its own (`HOME` and `USERPROFILE` both point at a temporary directory), so the vfox caches and selections of the machine stay as they are.
 
@@ -20,6 +28,7 @@ The run has a HOME of its own (`HOME` and `USERPROFILE` both point at a temporar
 - vfox 1.1.0 on `PATH`.
 - A Java runtime for Maven 2 to 4: the default JDK.
 - `VFOX_MAVEN_JAVA8_HOME`: a JDK 8 with `lib/tools.jar`, for Maven 1.1. Its launcher passes `-Djava.endorsed.dirs`, which JDK 9 and later refuse, so Maven 1 runs on JDK 8 only.
+- bash on Linux and macOS, and PowerShell 7 (`pwsh`) on Windows.
 - The network, for Apache's servers.
 
 `VFOX_MAVEN_PLUGIN_DIR` names the checkout of the plugin. It defaults to the repository that holds the test.
@@ -41,7 +50,7 @@ go test -short ./...
 ## In CI
 
 - `e2e.yml`, Linux: the check is built for the runner's architecture with `go test -c`, and runs in the e2e image (`tests/e2e/Dockerfile`), with the checkout mounted read-only. The runners are `ubuntu-latest` (amd64) and `ubuntu-26.04-arm` (arm64).
-- `e2e.yml`, Windows: the check runs natively on `windows-latest`. `setup-java` installs a JDK 8 for Maven 1.1 and a JDK 21 as the default.
+- `e2e.yml`, Windows: the check runs natively on `windows-latest`, in PowerShell 7. `setup-java` installs a JDK 8 for Maven 1.1 and a JDK 21 as the default.
 - `lint.yml`: `gofmt`, `go vet` and `go test -short` on the Go code.
 
 ## Dev container
@@ -65,3 +74,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 ## Known gaps
 
 - The check installs the newest Maven 3 and Maven 4 releases and the three archived ones, not every release that `vfox search` lists.
+- The scenarios use the default `PreUse` of the plugin, which does nothing: the matching of versions is vfox's.
