@@ -15,23 +15,24 @@
 package e2e
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strings"
 	"testing"
 )
 
-// TestE2E installs Maven through vfox, from the plugin in this repository, and runs it.
-// It downloads Maven from Apache, so it is skipped under go test -short, which runs the
-// unit tests only.
+// TestE2E installs Maven through vfox, from the plugin in this repository, and runs it. It
+// downloads Maven from Apache, so it is skipped under go test -short, which runs the unit
+// tests only.
 //
 // It needs vfox 1.1.0 on PATH, the default Java runtime for Maven 2 to 4, and
 // VFOX_MAVEN_JAVA8_HOME, a JDK 8 with lib/tools.jar, for Maven 1.1: its launcher passes an
 // option that JDK 9 and later refuse. VFOX_MAVEN_PLUGIN_DIR names the checkout of the plugin
-// and defaults to the repository this package is in. See docs/e2e.md.
+// and defaults to the repository this package is in. Scenarios run in bash, or in PowerShell 7
+// on Windows; see use.go and docs/e2e.md.
 //
 // Run it from tests/e2e:
 //
@@ -78,15 +79,24 @@ func TestE2E(t *testing.T) {
 	targets := append([]string{newest4, newest3}, historical...)
 	for _, version := range targets {
 		t.Run(version, func(t *testing.T) {
-			checkRelease(t, v, plugin, version, java8)
+			checkRelease(t, v, plugin, java8, version)
 		})
 	}
+	t.Run("session overrides global", func(t *testing.T) {
+		checkSessionScope(t, v.home, archivedMaven3, newest3)
+	})
+	t.Run("project scope", func(t *testing.T) {
+		checkProjectScope(t, v.home, newest3, archivedMaven3)
+	})
+	t.Run("major version spec", func(t *testing.T) {
+		checkMajorSpec(t, v.home, "3", newest3)
+	})
 }
 
-// checkRelease installs one release and checks three things: that vfox verified its
-// checksum, that the launcher the release ships runs and reports the release, and that
-// the EnvKeys hook of the plugin puts the release's bin directory on PATH.
-func checkRelease(t *testing.T, v vfox, plugin, version, java8 string) {
+// checkRelease installs one release, and checks three things: that vfox verified its checksum,
+// that vfox use makes the release the global version and the Maven command runs it, and that
+// the EnvKeys hook of the plugin puts the bin directory of the release on PATH.
+func checkRelease(t *testing.T, v vfox, plugin, java8, version string) {
 	spec := "maven@" + version
 	out, err := v.run("install", spec)
 	if err != nil {
@@ -96,30 +106,22 @@ func checkRelease(t *testing.T, v vfox, plugin, version, java8 string) {
 		t.Fatalf("vfox install %s did not verify a checksum:\n%s", spec, out)
 	}
 
+	major := majorOf(version)
+	s := scenario{
+		home:     v.home,
+		dir:      v.home,
+		launcher: launcherCommand(major),
+		steps:    []step{{use: []string{"--global", spec}}, {report: true}},
+	}
+	if major == "1" {
+		s.java = java8
+	}
+	checkReport(t, runOne(t, s), version, globalDir(v.home))
+
 	dir, err := v.installDir(spec)
 	if err != nil {
 		t.Fatal(err)
 	}
-	major := majorOf(version)
-	launcher, err := findLauncher(dir, launcherNames(major, runtime.GOOS == "windows"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command(launcher, "-v")
-	want := "Apache Maven " + version
-	if major == "1" {
-		// Maven 1 has no such line: its banner ends with "v. 1.1".
-		cmd.Env = withJava(os.Environ(), java8)
-		want = "v. " + version
-	}
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("%s -v: %v\n%s", launcher, err, output)
-	}
-	if !strings.Contains(string(output), want) {
-		t.Fatalf("%s -v does not report %s:\n%s", launcher, version, output)
-	}
-
 	keys, err := v.envKeys(plugin, dir)
 	if err != nil {
 		t.Fatal(err)
@@ -127,6 +129,98 @@ func checkRelease(t *testing.T, v vfox, plugin, version, java8 string) {
 	if got, want := filepath.Clean(keys["PATH"]), filepath.Join(dir, "bin"); got != want {
 		t.Fatalf("EnvKeys sets PATH to %q, want %q", got, want)
 	}
+}
+
+// checkSessionScope checks that a release selected for the session wins over the global
+// selection, and that the session ends with its shell: the next shell sees the global one.
+func checkSessionScope(t *testing.T, home, global, session string) {
+	t.Helper()
+	selected := runOne(t, scenario{
+		home:     home,
+		dir:      home,
+		launcher: "mvn",
+		steps: []step{
+			{use: []string{"--global", "maven@" + global}},
+			{use: []string{"maven@" + session}},
+			{report: true},
+		},
+	})
+	checkReport(t, selected, session, home)
+
+	after := runOne(t, scenario{
+		home:     home,
+		dir:      home,
+		launcher: "mvn",
+		steps:    []step{{report: true}},
+	})
+	checkReport(t, after, global, globalDir(home))
+}
+
+// checkProjectScope checks that vfox use --project selects a release for a project directory,
+// in the project's .vfox.toml, and that the global selection still applies outside it.
+func checkProjectScope(t *testing.T, home, version, global string) {
+	t.Helper()
+	project := tempDir(t)
+	inside := runOne(t, scenario{
+		home:     home,
+		dir:      project,
+		launcher: "mvn",
+		steps:    []step{{use: []string{"--project", "maven@" + version}}, {report: true}},
+	})
+	checkReport(t, inside, version, project)
+
+	data, err := os.ReadFile(filepath.Join(project, ".vfox.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := fmt.Sprintf("maven = %q", version); !strings.Contains(string(data), want) {
+		t.Fatalf(".vfox.toml does not contain %q:\n%s", want, data)
+	}
+
+	outside := runOne(t, scenario{
+		home:     home,
+		dir:      home,
+		launcher: "mvn",
+		steps:    []step{{report: true}},
+	})
+	checkReport(t, outside, global, globalDir(home))
+}
+
+// checkMajorSpec checks that vfox use with a major version alone selects the newest installed
+// release of that major version.
+func checkMajorSpec(t *testing.T, home, major, version string) {
+	t.Helper()
+	selected := runOne(t, scenario{
+		home:     home,
+		dir:      home,
+		launcher: launcherCommand(major),
+		steps:    []step{{use: []string{"--global", "maven@" + major}}, {report: true}},
+	})
+	checkReport(t, selected, version, globalDir(home))
+}
+
+// checkReport checks that vfox reports version as current, that the Maven command resolves to
+// a launcher inside dir, and that the command runs that version.
+func checkReport(t *testing.T, r report, version, dir string) {
+	t.Helper()
+	if r.current != version {
+		t.Fatalf("vfox current reports %q, want %s", r.current, version)
+	}
+	if !underDir(r.launcher, dir) {
+		t.Fatalf("the Maven command resolves to %s, want a path under %s", r.launcher, dir)
+	}
+	if !strings.Contains(r.output, banner(version)) {
+		t.Fatalf("the Maven command does not report %s:\n%s", version, r.output)
+	}
+}
+
+// banner returns the line that the Maven command prints to report a version. Maven 1 has no
+// such line: its banner ends with "v. 1.1".
+func banner(version string) string {
+	if majorOf(version) == "1" {
+		return "v. " + version
+	}
+	return "Apache Maven " + version
 }
 
 // pluginDirectory returns the checkout of the plugin that the check installs.
@@ -156,8 +250,8 @@ func requiredEnv(t *testing.T, name string) string {
 	return value
 }
 
-// tempDir returns a new temporary directory that the test removes when it ends. Windows
-// keeps a file locked while a process runs, so a directory may stay there; that is logged.
+// tempDir returns a new temporary directory that the test removes when it ends. Windows keeps
+// a file locked while a process runs, so a directory may stay there; that is logged.
 func tempDir(t *testing.T) string {
 	t.Helper()
 	dir, err := os.MkdirTemp("", "vfox-maven-e2e-")

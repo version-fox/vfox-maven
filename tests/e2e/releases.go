@@ -17,16 +17,16 @@ package e2e
 import (
 	"bufio"
 	"fmt"
-	"io/fs"
-	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 )
 
+// archivedMaven3 is a Maven 3 release that only archive.apache.org keeps.
+const archivedMaven3 = "3.0.5"
+
 // historical are releases that only archive.apache.org keeps, and each of them uses a
 // layout that the plugin reads: 3.0.5 and 2.2.1 the usual one, 1.1 the one of Maven 1.
-var historical = []string{"3.0.5", "2.2.1", "1.1"}
+var historical = []string{archivedMaven3, "2.2.1", "1.1"}
 
 // listingLine matches one release in the output of vfox search maven: " - <version>".
 var listingLine = regexp.MustCompile(`^\s*-\s+(\S+)\s*$`)
@@ -61,42 +61,11 @@ func newestOf(versions []string, major string) (string, error) {
 	return "", fmt.Errorf("vfox search maven lists no Maven %s release", major)
 }
 
-// launcherNames returns the names of the command that runs Maven, in the order of
-// preference. Maven 1 runs as maven, Maven 2 to 4 as mvn, and Windows has batch files
-// for both.
-func launcherNames(major string, windows bool) []string {
-	command := "mvn"
+// launcherCommand returns the name of the command that runs Maven: maven for Maven 1, and
+// mvn for Maven 2 to 4.
+func launcherCommand(major string) string {
 	if major == "1" {
-		command = "maven"
+		return "maven"
 	}
-	if windows {
-		return []string{command + ".cmd", command + ".bat"}
-	}
-	return []string{command}
-}
-
-// findLauncher returns the launcher of an installed Maven: the file named by the first of
-// names that is found in a bin directory under root. The launchers are searched for under
-// root because a release unpacks into a directory of its own.
-func findLauncher(root string, names []string) (string, error) {
-	found, rank := "", len(names)
-	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if entry.IsDir() || filepath.Base(filepath.Dir(path)) != "bin" {
-			return nil
-		}
-		if i := slices.Index(names, entry.Name()); i >= 0 && i < rank {
-			found, rank = path, i
-		}
-		return nil
-	})
-	if err != nil {
-		return "", err
-	}
-	if found == "" {
-		return "", fmt.Errorf("none of %v in a bin directory under %s", names, root)
-	}
-	return found, nil
+	return "mvn"
 }

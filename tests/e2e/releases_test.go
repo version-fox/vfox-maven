@@ -15,8 +15,6 @@
 package e2e
 
 import (
-	"os"
-	"path/filepath"
 	"slices"
 	"testing"
 )
@@ -51,51 +49,10 @@ func TestNewestOf(t *testing.T) {
 	}
 }
 
-func TestLauncherNames(t *testing.T) {
-	cases := []struct {
-		major   string
-		windows bool
-		want    []string
-	}{
-		{"1", false, []string{"maven"}},
-		{"3", false, []string{"mvn"}},
-		{"1", true, []string{"maven.cmd", "maven.bat"}},
-		{"4", true, []string{"mvn.cmd", "mvn.bat"}},
-	}
-	for _, c := range cases {
-		if got := launcherNames(c.major, c.windows); !slices.Equal(got, c.want) {
-			t.Errorf("launcherNames(%s, %t) = %v, want %v", c.major, c.windows, got, c.want)
+func TestLauncherCommand(t *testing.T) {
+	for major, want := range map[string]string{"1": "maven", "2": "mvn", "3": "mvn", "4": "mvn"} {
+		if got := launcherCommand(major); got != want {
+			t.Errorf("launcherCommand(%s) = %s, want %s", major, got, want)
 		}
-	}
-}
-
-func TestFindLauncher(t *testing.T) {
-	// A release unpacks into a directory of its own, with its launchers in bin.
-	root := t.TempDir()
-	bin := filepath.Join(root, "maven-3.10.1", "bin")
-	if err := os.MkdirAll(bin, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	for _, name := range []string{"mvn.bat", "mvn.cmd", "mvn"} {
-		if err := os.WriteFile(filepath.Join(bin, name), []byte("launcher\n"), 0o755); err != nil {
-			t.Fatal(err)
-		}
-	}
-	// A file of the same name outside bin is not a launcher.
-	lib := filepath.Join(root, "maven-3.10.1", "lib")
-	if err := os.MkdirAll(lib, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(lib, "maven"), []byte("not a launcher\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-
-	// The first name that is found wins, in the order of names.
-	got, err := findLauncher(root, []string{"mvn.cmd", "mvn.bat", "mvn"})
-	if err != nil || got != filepath.Join(bin, "mvn.cmd") {
-		t.Fatalf("findLauncher = %q, %v; want %q", got, err, filepath.Join(bin, "mvn.cmd"))
-	}
-	if _, err := findLauncher(root, []string{"maven"}); err == nil {
-		t.Error("findLauncher must fail when no bin directory has the launcher")
 	}
 }

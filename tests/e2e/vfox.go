@@ -91,13 +91,14 @@ func parseEnvKeys(output string) (map[string]string, error) {
 	return keys, nil
 }
 
-// withHome returns env with the home directories replaced by home, and VFOX_HOME
-// removed, so that everything vfox writes lands under home.
+// withHome returns env with the home directories replaced by home, and with the variables of
+// a vfox session removed. So everything vfox writes lands under home, and a shell that the
+// check starts does not inherit the session of the shell that started the check.
 func withHome(env []string, home string) []string {
 	kept := make([]string, 0, len(env)+2)
 	for _, entry := range env {
 		name, _, _ := strings.Cut(entry, "=")
-		if isHomeVariable(name) {
+		if isVfoxVariable(name) {
 			continue
 		}
 		kept = append(kept, entry)
@@ -105,15 +106,14 @@ func withHome(env []string, home string) []string {
 	return append(kept, "HOME="+home, "USERPROFILE="+home)
 }
 
-// isHomeVariable reports whether name decides where vfox keeps its files. Variable names
-// are compared without regard to case, as Windows does.
-func isHomeVariable(name string) bool {
-	for _, known := range []string{"HOME", "USERPROFILE", "VFOX_HOME"} {
-		if strings.EqualFold(name, known) {
-			return true
-		}
+// isVfoxVariable reports whether name decides where vfox keeps its files, or belongs to a shell
+// that has vfox activated. Variable names are compared without regard to case, as Windows does.
+func isVfoxVariable(name string) bool {
+	upper := strings.ToUpper(name)
+	if strings.HasPrefix(upper, "__VFOX_") {
+		return true
 	}
-	return false
+	return upper == "HOME" || upper == "USERPROFILE" || upper == "VFOX_HOME"
 }
 
 // withJava returns env with JAVA_HOME set to java, and the bin directory of java first on PATH.

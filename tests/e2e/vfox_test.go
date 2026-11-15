@@ -22,7 +22,15 @@ import (
 )
 
 func TestWithHome(t *testing.T) {
-	env := []string{"PATH=/usr/bin", "HOME=/root", "Userprofile=C:\\old", "VFOX_HOME=/cache", "JAVA_HOME=/jdk"}
+	env := []string{
+		"PATH=/usr/bin",
+		"HOME=/root",
+		"Userprofile=C:\\old",
+		"VFOX_HOME=/cache",
+		"__VFOX_PID=42",
+		"__VFOX_SHELL=bash",
+		"JAVA_HOME=/jdk",
+	}
 	got := withHome(env, "/tmp/e2e")
 	want := []string{"PATH=/usr/bin", "JAVA_HOME=/jdk", "HOME=/tmp/e2e", "USERPROFILE=/tmp/e2e"}
 	if !slices.Equal(got, want) {
