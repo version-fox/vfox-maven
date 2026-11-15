@@ -91,6 +91,9 @@ func TestE2E(t *testing.T) {
 	t.Run("major version spec", func(t *testing.T) {
 		checkMajorSpec(t, v.home, "3", newest3)
 	})
+	t.Run("prerelease order", func(t *testing.T) {
+		checkPrereleaseOrder(t, binary, zipPath)
+	})
 }
 
 // checkRelease installs one release, and checks three things: that vfox verified its checksum,
@@ -197,6 +200,32 @@ func checkMajorSpec(t *testing.T, home, major, version string) {
 		steps:    []step{{use: []string{"--global", "maven@" + major}}, {report: true}},
 	})
 	checkReport(t, selected, version, globalDir(home))
+}
+
+// checkPrereleaseOrder checks that vfox use selects the newest pre-release that a spec names, in
+// Maven's order. vfox itself compares only the numbers of versions, so it may take 4.0.0-alpha-2
+// for 4.0.0-alpha-13; the plugin's PreUse decides instead. The check runs in a home of its own,
+// so no other release of Maven 4 is installed there.
+func checkPrereleaseOrder(t *testing.T, binary, zipPath string) {
+	t.Helper()
+	v := vfox{binary: binary, home: tempDir(t)}
+	if out, err := v.run("add", "maven", "--source", zipPath); err != nil {
+		t.Fatalf("vfox add maven: %v\n%s", err, out)
+	}
+	for _, version := range []string{"4.0.0-alpha-2", "4.0.0-alpha-13"} {
+		if out, err := v.run("install", "maven@"+version); err != nil {
+			t.Fatalf("vfox install maven@%s: %v\n%s", version, err, out)
+		}
+	}
+	for _, spec := range []string{"4", "4.0"} {
+		selected := runOne(t, scenario{
+			home:     v.home,
+			dir:      v.home,
+			launcher: "mvn",
+			steps:    []step{{use: []string{"--global", "maven@" + spec}}, {report: true}},
+		})
+		checkReport(t, selected, "4.0.0-alpha-13", globalDir(v.home))
+	}
 }
 
 // checkReport checks that vfox reports version as current, that the Maven command resolves to
