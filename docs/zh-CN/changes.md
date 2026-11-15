@@ -4,7 +4,7 @@
 
 每个版本改了什么，从用户的角度来看。GitHub 的发布页列出了对应的拉取请求。
 
-## 未发布
+## 0.1.3（2026-11-15）
 
 - 插件可以安装 Maven 1 到 4，包括只有 archive.apache.org 保存的旧版本。`vfox search maven` 列出 dlcdn.apache.org 或 archive.apache.org 上的每个版本，每个只列一次，`vfox install` 从列出它的那个源下载。Maven 2.0.11 安装的是它的 zip，因为它的 tar.gz 解不开。见 [versions.md](versions.md)。
 - `vfox use maven@4` 选中写法所指的、已安装的版本。装了 4.0.0-alpha-2 和 4.0.0-alpha-13 时，它选中 4.0.0-alpha-13，以前选中的是 4.0.0-alpha-2。写法按整段匹配：`3.1` 不指 `3.10.1`。

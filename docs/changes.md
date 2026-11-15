@@ -4,7 +4,7 @@
 
 What changed in each release, as a user notices it. GitHub's release pages list the pull requests.
 
-## Unreleased
+## 0.1.3 (2026-11-15)
 
 - The plugin installs Maven 1 to 4, including the releases that only archive.apache.org keeps. `vfox search maven` lists every release that dlcdn.apache.org or archive.apache.org has, each once, and `vfox install` takes each one from the source that lists it. Maven 2.0.11 installs from its zip, as its tar.gz does not unpack. See [versions.md](versions.md).
 - `vfox use maven@4` selects the installed release that the spec names. With 4.0.0-alpha-2 and 4.0.0-alpha-13 installed, it selects 4.0.0-alpha-13, where it used to select 4.0.0-alpha-2. A spec names whole parts: `3.1` does not name `3.10.1`.

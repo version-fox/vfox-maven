@@ -82,7 +82,7 @@ local result = plugin:PreInstall({ version = "3.10.1" })
 
 ## 发布
 
-维护者在默认分支上打开 **Actions → Plugin → Run workflow**，输入不带 `v` 前缀的稳定版本号。共享工作流 [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action) 会更新 `metadata.lua`、创建版本提交和标签，并在本仓库发布 ZIP 和清单。不需要在本地打标签，也不需要额外的发布令牌。拉取请求只运行检查，PR 标题不再触发发布。
+维护者在默认分支上打开 **Actions → Plugin → Run workflow**，输入不带 `v` 前缀的稳定版本号。共享工作流 [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action) 会更新 `metadata.lua`、创建版本提交和标签，并在本仓库发布 ZIP 和清单。不需要在本地打标签，也不需要额外的发布令牌。拉取请求只运行检查，PR 标题不会触发发布。
 
 推送与 `PLUGIN.version` 一致的版本标签也会发布。如果发布失败，重新运行失败的任务即可继续。
 
