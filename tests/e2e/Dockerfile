@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The image of the end-to-end check (see docs/e2e.md): Ubuntu, a Java runtime
-# for mvn, zip to pack the plugin, and the vfox release the test workflow pins.
-# The plugin is not copied in: tests/e2e/run.sh reads it from a mounted checkout.
+# The image of the end-to-end check (see docs/e2e.md): Ubuntu, the Java runtimes that
+# Maven needs, and the vfox release that the test workflow pins. The check is a Go test
+# binary, which the workflow builds for the runner's architecture and mounts here; the
+# plugin is mounted from the checkout too, so neither is copied into the image.
 #
-# A Java runtime comes from apt, not from vfox, because Maven needs one to run
-# and this plugin does not install a JDK.
+# The Java runtimes come from apt, not from vfox: Maven needs one to run, and this
+# plugin does not install a JDK. Maven 1 also needs a JDK 8 with lib/tools.jar, so the
+# JDK rather than the JRE, and VFOX_MAVEN_JAVA8_HOME names it.
 
 FROM ubuntu:26.04
 
@@ -32,8 +34,11 @@ RUN set -o errexit -o nounset -o xtrace; \
         ca-certificates \
         curl \
         default-jre-headless \
-        zip; \
+        openjdk-8-jdk-headless; \
     rm --recursive --force /var/lib/apt/lists/*; \
+    jdk8="$(ls --directory /usr/lib/jvm/java-8-openjdk-*)"; \
+    test -f "${jdk8}/lib/tools.jar"; \
+    ln --symbolic "${jdk8}" /opt/jdk8; \
     case "$(dpkg --print-architecture)" in \
         amd64) vfox_dir="vfox_${VFOX_VERSION}_linux_x86_64" ;; \
         arm64) vfox_dir="vfox_${VFOX_VERSION}_linux_aarch64" ;; \
@@ -44,3 +49,5 @@ RUN set -o errexit -o nounset -o xtrace; \
     tar --extract --gzip --file /tmp/vfox.tar.gz --directory /usr/local/bin --strip-components=1 "${vfox_dir}/vfox"; \
     rm --force /tmp/vfox.tar.gz; \
     vfox --version
+
+ENV VFOX_MAVEN_JAVA8_HOME=/opt/jdk8

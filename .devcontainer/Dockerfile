@@ -13,9 +13,9 @@
 # limitations under the License.
 
 # The repository dev container (see docs/e2e.md): the tools that the lint, test
-# and license workflows run, the vfox release they test with, and a Java runtime
-# for tests/e2e/run.sh. Its versions match those workflows and the e2e image in
-# tests/e2e/Dockerfile; change them together.
+# and license workflows run, the vfox release they test with, and a Java runtime for
+# the end-to-end check, which is a Go test in tests/e2e. Its versions match those
+# workflows and the e2e image in tests/e2e/Dockerfile; change them together.
 #
 # Each download picks its asset by the architecture.
 
@@ -62,3 +62,29 @@ RUN set -o errexit -o nounset -o xtrace; \
     lua-language-server --version; \
     vfox --version; \
     command -v license-eye
+
+# A JDK 8 for Maven 1.1, next to the default runtime above: its launcher needs a JDK
+# with lib/tools.jar, and the end-to-end check (see docs/e2e.md) reads its path from
+# VFOX_MAVEN_JAVA8_HOME. Debian has no JDK 8 package, so the JDK comes from the Temurin
+# release of the architecture, checked against the checksum pinned for it.
+ARG TEMURIN8_RELEASE=jdk8u512-b09
+ARG TEMURIN8_VERSION=8u512b09
+ARG TEMURIN8_X64_SHA256=fb3bfa869012419b562bb4235d0d83ec4f8c1dda62ae432ba20c6c3a7e43f7e4
+ARG TEMURIN8_AARCH64_SHA256=01263df22c4553f63146bbae807e70cd4628dd0d9ec7582f01cb2453f7c69aaa
+
+RUN set -o errexit -o nounset -o xtrace; \
+    case "$(dpkg --print-architecture)" in \
+        amd64) jdk_arch=x64; jdk_sha256="${TEMURIN8_X64_SHA256}" ;; \
+        arm64) jdk_arch=aarch64; jdk_sha256="${TEMURIN8_AARCH64_SHA256}" ;; \
+        *) echo "unsupported architecture" >&2; exit 1 ;; \
+    esac; \
+    jdk_asset="OpenJDK8U-jdk_${jdk_arch}_linux_hotspot_${TEMURIN8_VERSION}.tar.gz"; \
+    curl --fail --silent --show-error --location --output /tmp/jdk8.tar.gz \
+        "https://github.com/adoptium/temurin8-binaries/releases/download/${TEMURIN8_RELEASE}/${jdk_asset}"; \
+    echo "${jdk_sha256}  /tmp/jdk8.tar.gz" | sha256sum --check; \
+    mkdir --parents /opt/jdk8; \
+    tar --extract --gzip --file /tmp/jdk8.tar.gz --directory /opt/jdk8 --strip-components=1; \
+    rm --force /tmp/jdk8.tar.gz; \
+    test -f /opt/jdk8/lib/tools.jar
+
+ENV VFOX_MAVEN_JAVA8_HOME=/opt/jdk8
