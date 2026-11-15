@@ -1,0 +1,46 @@
+# Copyright 2026 Han Li and contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # A new push to a pull request replaces the run of the push before it. Every
+  # commit on main gets a group of its own instead, so a newer run never cancels
+  # an older one there.
+  group: e2e-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  e2e-linux:
+    if: github.repository == 'version-fox/vfox-maven'
+    name: Linux container
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build the e2e image
+        run: docker build --tag vfox-maven-e2e tests/e2e
+      # The checkout is mounted read-only: run.sh only reads the plugin.
+      - name: Install Maven through vfox in the container
+        run: docker run --rm --volume "$GITHUB_WORKSPACE:/src:ro" vfox-maven-e2e bash /src/tests/e2e/run.sh

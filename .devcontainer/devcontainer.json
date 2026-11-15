@@ -1,0 +1,12 @@
+{
+  "name": "vfox-maven (Linux)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["sumneko.lua"]
+    }
+  }
+}

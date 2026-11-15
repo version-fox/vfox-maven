@@ -1,22 +1,32 @@
 # Introduction
-vfox-maven is a plugin for [vfox](https://vfox.lhan.me/).
+
+[中文](README_CN.md) | [English](README.md)
+
+vfox-maven is a plugin for [vfox](https://vfox.lhan.me/). It installs [Apache Maven](https://maven.apache.org/): the Maven 2, 3 and 4 releases that Apache publishes on [dlcdn.apache.org](https://dlcdn.apache.org/maven/) and [archive.apache.org](https://archive.apache.org/dist/maven/), the old ones included.
+
 # Install
+
 After installing vfox, run the following command to add the plugin:
+
 ```bash
 vfox add maven
 ```
 
-## Releasing this plugin
+Maven runs on a Java runtime, which this plugin does not install. Put a JDK on `PATH` or set `JAVA_HOME`. The [vfox-java](https://github.com/version-fox/vfox-java) plugin installs one.
 
-Maintainers can publish from **Actions → Plugin → Run workflow** on the default
-branch by entering a stable plugin version without the `v` prefix. The shared
-workflow updates `metadata.lua`, creates the version commit and tag, and publishes
-the ZIP and manifest in this repository. No local tag or extra release token is
-needed. Pull requests run checks only; PR titles no longer trigger publication.
+# Usage
 
-Existing version-tag pushes are supported when `PLUGIN.version` already matches
-the tag. If publication fails, re-run the original failed job to resume it.
+```bash
+vfox search maven                # the releases the plugin lists
+vfox install maven@3.10.1        # install one; its checksum is verified
+vfox use --global maven@3.10.1   # make it the global version
+mvn --version
+```
 
-The workflow follows the shared `@v1` release-tool version. Updating the tool does
-not release this plugin. See the [shared workflow documentation](https://github.com/version-fox/plugin-manifest-action)
-for the package contract and first-rollout requirements.
+# Documentation
+
+- [Versions](docs/versions.md): the versions listed, where they come from, and how they are checked
+- [Development](docs/development.md): the layout, the tests, the checks, and releasing
+- [End-to-end check and dev container](docs/e2e.md)
+
+The Chinese documents are [README_CN.md](README_CN.md) and [docs/zh-CN/](docs/zh-CN/).
