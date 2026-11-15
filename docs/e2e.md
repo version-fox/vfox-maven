@@ -20,6 +20,8 @@ Four scenarios then check the other scopes of `vfox use`, and how a spec finds i
 - `vfox use` with a major version alone (`maven@3`) selects the newest installed release of that major version.
 - `vfox use` with `maven@4`, when 4.0.0-alpha-2 and 4.0.0-alpha-13 are installed, selects 4.0.0-alpha-13, the newer of the two in Maven's order. This one runs in a home of its own, where no other Maven 4 release is installed.
 
+The check then adopts a Maven that is already on the machine. An unpacked copy of Maven 3.0.5, kept outside vfox's directories, is named by `M2_HOME`, and `vfox link --detect -y maven` links it. `vfox list maven` must show that version linked to the copy, and `vfox use` must select it, so the Maven command runs the copy.
+
 `vfox use` takes effect only in a shell that has vfox activated, as a user's shell has it, so the scenarios run in one: bash on Linux and macOS, and PowerShell 7 on Windows. The script runs `vfox activate`, then `vfox use`, then `vfox env`, because a script does not run the prompt hook that applies `vfox env`, and then the Maven command. `VFOX_MAVEN_SHELL` (`bash` or `pwsh`) overrides the choice, so the PowerShell path can run on Linux. The variables of a vfox session (`__VFOX_*`) are removed from the environment of these shells, so a session of the shell that starts the check is not inherited.
 
 The run has a HOME of its own (`HOME` and `USERPROFILE` both point at a temporary directory), so the vfox caches and selections of the machine stay as they are.

@@ -20,12 +20,15 @@ Maven runs on a Java runtime, which this plugin does not install. Put a JDK on `
 vfox search maven                # the releases the plugin lists
 vfox install maven@3.10.1        # install one; its checksum is verified
 vfox use --global maven@3.10.1   # make it the global version
+vfox link --detect maven         # adopt a Maven that is already on this machine
 mvn --version
 ```
 
 # Documentation
 
 - [Versions](docs/versions.md): the versions listed, where they come from, and how they are checked
+- [Already installed Mavens](docs/link.md): adopting the Mavens on the machine with `vfox link --detect maven`
+- [Changes](docs/changes.md): what each release changed
 - [Development](docs/development.md): the layout, the tests, the checks, and releasing
 - [End-to-end check and dev container](docs/e2e.md)
 

@@ -20,6 +20,8 @@
 - `vfox use` 只写大版本号（`maven@3`）时，选中已安装的该大版本的最新版本。
 - `vfox use` 选择 `maven@4` 时，若装了 `4.0.0-alpha-2` 和 `4.0.0-alpha-13`，选中按 Maven 顺序更新的 `4.0.0-alpha-13`。这个场景在独立的家目录里运行，那里没有装其他 Maven 4 版本。
 
+然后检查会采用一个本机上已有的 Maven：把 vfox 安装的 Maven 3.0.5 复制到 vfox 目录之外，用 `M2_HOME` 指向这个副本，再用 `vfox link --detect -y maven` 链接它。`vfox list maven` 必须显示该版本链接到这个副本，`vfox use` 必须选中它，Maven 命令运行的也是这个副本。
+
 `vfox use` 只在已激活 vfox 的 shell 里生效，就像用户的 shell 那样，所以场景在这样的 shell 里运行：Linux 和 macOS 用 bash，Windows 用 PowerShell 7。脚本依次执行 `vfox activate`、`vfox use`、`vfox env`（脚本不会触发应用 `vfox env` 的提示符钩子），然后运行 Maven 命令。`VFOX_MAVEN_SHELL`（`bash` 或 `pwsh`）可以覆盖这个选择，因此 PowerShell 的路径也能在 Linux 上运行。这些 shell 的环境里会去掉 vfox 会话的变量（`__VFOX_*`），因此不会继承启动检查的那个 shell 的会话。
 
 测试使用自己的家目录（`HOME` 和 `USERPROFILE` 都指向临时目录），因此机器上 vfox 的缓存和全局选择不会被改动。

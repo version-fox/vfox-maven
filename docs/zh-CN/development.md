@@ -11,8 +11,10 @@ hooks/pre_install.lua     vfox install：压缩包的地址和它的校验和
 hooks/env_keys.lua        PATH：安装目录下的 bin 目录
 hooks/pre_use.lua         vfox use：符合该写法的、已安装的最新版本，按 Maven 的顺序
 hooks/post_install.lua    vfox 解压压缩包之后：无需操作
+hooks/detect.lua          vfox link --detect maven：本机上已有的 Maven 目录
 lib/util.lua              两个源、它们的列表、压缩包和校验文件
 lib/maven_version.lua     Maven 版本的顺序，包括预览版
+lib/detect_maven.lua      找出这些 Maven 目录：看它们的名字和启动脚本，以及去哪里找
 tests/*_test.lua          离线测试，由 vfox plugin test 运行
 tests/e2e/                端到端检查（一个 Go 测试）及其镜像，见 e2e.md
 .devcontainer/            开发容器，见 e2e.md
@@ -33,6 +35,7 @@ vfox 读取 `metadata.lua`，在某个命令需要时调用对应的钩子，并
 | `vfox search maven` | `Available`，读取 dlcdn.apache.org 和 archive.apache.org 的列表 |
 | `vfox install maven@3.10.1` | `PreInstall` 找到列出该版本的源，返回它的地址和校验和。vfox 下载、核对校验和并解压，然后调用 `PostInstall` |
 | `vfox use maven@3.10.1` | `PreUse`，找出该写法对应的已安装版本，然后是 `EnvKeys`，它提供 `PATH` |
+| `vfox link --detect maven` | `Detect`，返回本机上已有的 Maven 目录（`lib/detect_maven.lua`）。vfox 列出它们，链接你选中的，之后 `vfox use` 的用法和安装的版本一样 |
 
 `PreUse` 负责 `vfox use` 的版本匹配。vfox 自己也会匹配，但它只比较版本的数字，所以 `maven@4` 可能选中 `4.0.0-alpha-2` 而不是 `4.0.0-alpha-13`。钩子按 Maven 的顺序选出已安装的最新版本；端到端检查会装上这两个版本，并检查 `vfox use maven@4` 选中的是哪一个。
 
@@ -85,9 +88,15 @@ local result = plugin:PreInstall({ version = "3.10.1" })
 
 工作流跟随共享的 `@v1` 发布工具，更新工具本身不会发布这个插件。包的约定和首次上线的要求，见共享工作流的文档。
 
+## 发布之后
+
+文档用「未发布」标出比上一个版本新的内容。版本发布后，把 [changes.md](changes.md) 里这些条目移到新版本下面，写上发布日期，并去掉这些标注，两种语言都要处理：`grep -rn -i -e unreleased -e 未发布 docs README*`。
+
 ## 已知的限制
 
 - Maven 1.1 只能在 JDK 8 上运行，见 [versions.md](versions.md#maven-1)。
+- `vfox link --detect maven` 找不到 Maven 1，它的文件里没有版本号。需要手动链接，见 [link.md](link.md)。
+- Windows 上，`--detect` 只从 jar 的名字读取版本，因为没有可以询问的启动脚本。jar 名字里没有版本号的 Maven 在那里找不到。
 - CI 在 Linux amd64 和 arm64 上，以及 Windows x86_64 和 arm64 上运行端到端检查。Windows arm64 上 Maven 1.1 用 x64 的 JDK 8 通过模拟运行，见 [e2e.md](e2e.md)。
 
 ## 文档的写法
