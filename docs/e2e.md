@@ -50,7 +50,7 @@ go test -short ./...
 ## In CI
 
 - `e2e.yml`, Linux: the check is built for the runner's architecture with `go test -c`, and runs in the e2e image (`tests/e2e/Dockerfile`), with the checkout mounted read-only. The runners are `ubuntu-latest` (amd64) and `ubuntu-26.04-arm` (arm64).
-- `e2e.yml`, Windows: the check runs natively on `windows-latest`, in PowerShell 7. `setup-java` installs a JDK 8 for Maven 1.1 and a JDK 21 as the default.
+- `e2e.yml`, Windows: the check runs natively in PowerShell 7, on `windows-latest` (x86_64) and `windows-11-arm` (arm64). `setup-java` installs an x64 JDK 8 for Maven 1.1 on both runners, and a JDK 21 for the runner's architecture as the default.
 - `lint.yml`: `gofmt`, `go vet` and `go test -short` on the Go code.
 
 ## Dev container
@@ -75,3 +75,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 
 - The check installs the newest Maven 3 and Maven 4 releases and the three archived ones, not every release that `vfox search` lists.
 - The scenarios use the default `PreUse` of the plugin, which does nothing: the matching of versions is vfox's.
+- On Windows arm64, Maven 1.1 runs on the x64 JDK 8 under emulation, because Temurin publishes no JDK 8 for that platform.

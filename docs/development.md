@@ -86,7 +86,7 @@ The workflow follows the shared `@v1` release tool, and updating the tool does n
 ## Known gaps
 
 - Maven 1.1 runs on JDK 8 only, see [versions.md](versions.md#maven-1).
-- CI runs the end-to-end check on Linux amd64 and arm64, and on Windows x86_64.
+- CI runs the end-to-end check on Linux amd64 and arm64, and on Windows x86_64 and arm64. On Windows arm64, Maven 1.1 runs on an x64 JDK 8 under emulation, see [e2e.md](e2e.md).
 
 ## Writing the docs
 

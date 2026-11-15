@@ -50,7 +50,7 @@ go test -short ./...
 ## 在 CI 中
 
 - `e2e.yml`，Linux：用 `go test -c` 为运行器的架构编译检查，然后在端到端镜像（`tests/e2e/Dockerfile`）里运行，仓库以只读方式挂载。运行器是 `ubuntu-latest`（amd64）和 `ubuntu-26.04-arm`（arm64）。
-- `e2e.yml`，Windows：检查直接在 `windows-latest` 上运行，使用 PowerShell 7。`setup-java` 安装一个给 Maven 1.1 用的 JDK 8，和作为默认的 JDK 21。
+- `e2e.yml`，Windows：检查用 PowerShell 7 直接运行，分别在 `windows-latest`（x86_64）和 `windows-11-arm`（arm64）上。`setup-java` 在两者上都安装一个 x64 的 JDK 8 给 Maven 1.1 用，并安装与运行器架构一致的 JDK 21 作为默认的 JDK。
 - `lint.yml`：对 Go 代码运行 `gofmt`、`go vet` 和 `go test -short`。
 
 ## 开发容器
@@ -75,3 +75,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 
 - 检查只安装最新的 Maven 3 和 Maven 4 版本，以及三个归档版本，而不是 `vfox search` 列出的每一个版本。
 - 场景使用插件默认的 `PreUse`，它什么也不做：版本的匹配由 vfox 负责。
+- 在 Windows arm64 上，Maven 1.1 用 x64 的 JDK 8 通过模拟运行，因为 Temurin 没有该平台的 JDK 8。

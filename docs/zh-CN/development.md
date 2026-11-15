@@ -86,7 +86,7 @@ local result = plugin:PreInstall({ version = "3.10.1" })
 ## 已知的限制
 
 - Maven 1.1 只能在 JDK 8 上运行，见 [versions.md](versions.md#maven-1)。
-- CI 在 Linux amd64 和 arm64 上，以及 Windows x86_64 上运行端到端检查。
+- CI 在 Linux amd64 和 arm64 上，以及 Windows x86_64 和 arm64 上运行端到端检查。Windows arm64 上 Maven 1.1 用 x64 的 JDK 8 通过模拟运行，见 [e2e.md](e2e.md)。
 
 ## 文档的写法
 
