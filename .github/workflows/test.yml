@@ -1,0 +1,89 @@
+# Copyright 2026 Han Li and contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Test Plugin
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    if: github.repository == 'version-fox/vfox-maven'
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x86_64
+            runs-on: ubuntu-latest
+            asset: vfox_1.1.0_linux_x86_64.tar.gz
+            sha256: 3b33c3c468b27bc17aecf0d6d3af24fe49fe204972984904a136a47b402a0ee4
+          - name: Linux arm64
+            runs-on: ubuntu-26.04-arm
+            asset: vfox_1.1.0_linux_aarch64.tar.gz
+            sha256: e702e057dfe588200727dfb3cf786d181b13f015cbcc9e13679a3edcfd07e430
+          - name: Windows x86_64
+            runs-on: windows-latest
+            asset: vfox_1.1.0_windows_x86_64.zip
+            sha256: 1bbec8fffddbb62de0d93030c3f6203c69680662bc65257ca4a5e611cb607d0a
+          # windows-11-arm is the Windows arm64 runner of GitHub-hosted runners.
+          - name: Windows arm64
+            runs-on: windows-11-arm
+            asset: vfox_1.1.0_windows_aarch64.zip
+            sha256: 67bf5c8b3bde5c1b3fc06dcaa460db9bb1dc9fc587b467d1dc96205377767465
+    env:
+      # The release is pinned here with the checksum of each asset, as the actions
+      # are pinned by their commits; change the pins together to move to another release.
+      VFOX_VERSION: 1.1.0
+      VFOX_ASSET: ${{ matrix.asset }}
+      VFOX_SHA256: ${{ matrix.sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install vfox (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          archive="$RUNNER_TEMP/vfox.tar.gz"
+          curl --fail --silent --show-error --location --output "$archive" \
+            "https://github.com/version-fox/vfox/releases/download/v${VFOX_VERSION}/${VFOX_ASSET}"
+          echo "$VFOX_SHA256  $archive" | sha256sum --check
+          mkdir "$RUNNER_TEMP/vfox"
+          tar --extract --gzip --file "$archive" --directory "$RUNNER_TEMP/vfox" --strip-components=1 \
+            "${VFOX_ASSET%.tar.gz}/vfox"
+          echo "$RUNNER_TEMP/vfox" >> "$GITHUB_PATH"
+      - name: Install vfox (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP $env:VFOX_ASSET
+          Invoke-WebRequest -Uri "https://github.com/version-fox/vfox/releases/download/v$env:VFOX_VERSION/$env:VFOX_ASSET" -OutFile $archive
+          $actual = (Get-FileHash -Algorithm SHA256 -Path $archive).Hash.ToLower()
+          if ($actual -ne $env:VFOX_SHA256) { throw "vfox checksum is $actual, want $env:VFOX_SHA256" }
+          $dir = Join-Path $env:RUNNER_TEMP "vfox"
+          Expand-Archive -Path $archive -DestinationPath $dir -Force
+          $binary = Get-ChildItem -Path $dir -Recurse -Filter vfox.exe | Select-Object -First 1
+          $binary.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # It finds tests/**/*_test.lua and runs each file in a VM of its own. A file
+      # that does not call test.load() from vfox.test fails, and so does a run
+      # that finds no test file.
+      - name: Run the offline plugin tests with vfox
+        run: vfox plugin test .

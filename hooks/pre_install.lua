@@ -1,39 +1,43 @@
+-- Copyright 2026 Han Li and contributors
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--   http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 local util = require("util")
-local http = require("http")
+
+--- @class PreInstallContext
+--- @field version string User-input version
+
 --- Returns some pre-installed information, such as version number, download address, local files, etc.
 --- If checksum is provided, vfox will automatically check it for you.
---- @param ctx table
---- @field ctx.version string User-input version
+--- @param ctx PreInstallContext
 --- @return table Version information
 function PLUGIN:PreInstall(ctx)
     local v = ctx.version
-    local major = string.sub(v, 1, 1)
-    if tonumber(major) ~= nil then
-        if major == "3" or major == "4" then
-            local checksums = {
-                sha512 = util.CHECKSUM_URL:format(major, v, v, "sha512"),
-                md5 = util.CHECKSUM_URL:format(major, v, v, "md5"),
-                sha1 = util.CHECKSUM_URL:format(major, v, v, "sha1"),
-            }
-            for k, url in pairs(checksums) do
-                local resp, err = http.get({
-                    url = url
-                })
-                if err == nil and resp.status_code == 200 then
-                    local result = {
-                        version = v,
-                        url = util.FILE_URL:format(major, v, v),
-                    }
-                    local removeSpace = string.match(resp.body,"(.-)%s")
-                    result[k] = removeSpace or resp.body
-                    return result
-                end
-            end
-        else
-            error("invalid version: " .. v)
-        end
-    else
+    local major = util:majorOf(v)
+    if major == nil then
         error("invalid version: " .. v)
     end
-    return {}
+    local source = util:sourceOf(major, v)
+    local url = util:archiveURL(source, major, v)
+    for _, algorithm in ipairs(util.ALGORITHMS) do
+        local digest = util:fetchDigest(url .. "." .. algorithm.name, algorithm.length)
+        if digest ~= nil then
+            return {
+                version = v,
+                url = url,
+                [algorithm.name] = digest,
+            }
+        end
+    end
+    error("Maven " .. v .. " has no checksum file at " .. source)
 end
