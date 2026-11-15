@@ -25,7 +25,14 @@ function PLUGIN:Available(ctx)
             table.insert(versions, release)
         end
     end
+    -- The stable releases come first, then the pre-releases, each group newest first. vfox takes
+    -- the first entry for `latest`, so `latest` is the newest stable release.
     table.sort(versions, function(a, b)
+        local pre_a = maven_version.is_prerelease(a.version)
+        local pre_b = maven_version.is_prerelease(b.version)
+        if pre_a ~= pre_b then
+            return not pre_a
+        end
         return maven_version.compare(a.version, b.version) > 0
     end)
     return versions

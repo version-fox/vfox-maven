@@ -2,7 +2,7 @@
 
 [中文](zh-CN/versions.md) | [English](versions.md)
 
-`vfox search maven` lists every Maven 1, 2, 3 and 4 release that Apache publishes, newest first. The list is read from two places:
+`vfox search maven` lists every Maven 1, 2, 3 and 4 release that Apache publishes. The stable releases come first, newest first, and the pre-releases follow, newest first. The list is read from two places:
 
 - [dlcdn.apache.org](https://dlcdn.apache.org/maven/), the mirror network that lists the current releases;
 - [archive.apache.org](https://archive.apache.org/dist/maven/), which keeps every release, the old ones too.
@@ -19,6 +19,8 @@ A version installs under the name it has in the list:
 vfox install maven@3.10.1
 vfox install maven@3.0.5
 ```
+
+`latest` names the first release of that list, so `vfox install maven@latest` installs the newest stable release. A pre-release installs by its name, as in `vfox install maven@4.0.0-rc-7`.
 
 The archive comes from dlcdn.apache.org when that lists the release, and from archive.apache.org otherwise. Maven 2 to 4 lay out their archives the same way: `maven-<major>/<version>/binaries/apache-maven-<version>-bin.tar.gz`, with one exception. Maven 2.0.11 is installed from its `apache-maven-2.0.11-bin.zip`, because its `tar.gz` has a stray zero block that vfox's unpacker rejects.
 

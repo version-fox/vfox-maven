@@ -93,4 +93,13 @@ function maven_version.compare(a, b)
     return compare_pieces(pieces(rest_a), pieces(rest_b))
 end
 
+--- Tells whether a Maven version is a pre-release: one with words after its numbers, such as
+--- 4.0.0-rc-7 or 3.5.0-beta-1. A release has nothing after its numbers.
+--- @param version string A version, such as 3.10.1 or 4.0.0-rc-7
+--- @return boolean True when the version is a pre-release
+function maven_version.is_prerelease(version)
+    local _, rest = parts(version)
+    return rest ~= ""
+end
+
 return maven_version

@@ -37,7 +37,7 @@ func TestMajorOf(t *testing.T) {
 }
 
 func TestNewestOf(t *testing.T) {
-	listed := []string{"4.0.0-rc-7", "4.0.0-alpha-2", "3.10.1", "3.0.5", "2.2.1", "1.1"}
+	listed := []string{"3.10.1", "3.0.5", "2.2.1", "1.1", "4.0.0-rc-7", "4.0.0-alpha-2"}
 	for major, want := range map[string]string{"4": "4.0.0-rc-7", "3": "3.10.1", "2": "2.2.1", "1": "1.1"} {
 		got, err := newestOf(listed, major)
 		if err != nil || got != want {
