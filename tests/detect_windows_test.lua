@@ -75,6 +75,12 @@ local function maven(home, lib)
     dirs[norm(home .. "/lib")] = lib or {}
 end
 
+-- A Maven 2 or 3.0 home, which ships mvn.bat and no mvn.cmd.
+local function maven_bat(home, lib)
+    files[norm(home .. "/bin/mvn.bat")] = true
+    dirs[norm(home .. "/lib")] = lib or {}
+end
+
 local function entries(dir, names)
     dirs[norm(dir)] = names
 end
@@ -95,8 +101,9 @@ maven("C:\\ProgramData\\chocolatey\\lib\\maven\\tools\\apache-maven-3.8.8", { "m
 entries("C:\\Users\\test\\.asdf\\installs\\maven", { "4.0.0-rc-7" })
 maven("C:\\Users\\test\\.asdf\\installs\\maven\\4.0.0-rc-7", { "maven-core-4.0.0-rc-7.jar" })
 -- A manual install under Program Files.
-entries("C:\\Program Files", { "apache-maven-3.6.3", "Java" })
+entries("C:\\Program Files", { "apache-maven-3.0.5", "apache-maven-3.6.3", "Java" })
 maven("C:\\Program Files\\apache-maven-3.6.3", { "maven-core-3.6.3.jar" })
+maven_bat("C:\\Program Files\\apache-maven-3.0.5", { "maven-core-3.0.5.jar" })
 -- Debian-style names give no version on Windows, so this Maven is not found.
 entries("C:\\Program Files\\Apache", { "Maven" })
 maven("C:\\Program Files\\Apache\\Maven", { "maven-core-3.x.jar" })
@@ -116,7 +123,8 @@ assert(by_version["3.8.8"].path == "C:\\ProgramData\\chocolatey\\lib\\maven\\too
 assert(by_version["3.8.8"].note == "installed by Chocolatey")
 assert(by_version["4.0.0-rc-7"].note == "installed by asdf")
 assert(by_version["3.6.3"].note == "in a system directory")
+assert(by_version["3.0.5"].path == "C:\\Program Files\\apache-maven-3.0.5", by_version["3.0.5"].path)
 assert(by_version["3.9.0"] == nil, "vfox's own install is not detected")
-assert(#found == 5, "five Maven homes, got " .. #found)
+assert(#found == 6, "six Maven homes, got " .. #found)
 
 print("PASS: detect finds the Maven homes of Windows by their names, Scoop and Chocolatey included")

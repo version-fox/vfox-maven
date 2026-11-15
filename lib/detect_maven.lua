@@ -14,7 +14,7 @@
 
 --- Finds Maven installs that are already on the machine, for `vfox link --detect maven`.
 ---
---- A Maven home holds `bin/mvn` (`bin\mvn.cmd` on Windows), or `libexec/bin/mvn` for a
+--- A Maven home holds `bin/mvn` (`bin\mvn.cmd` or `bin\mvn.bat` on Windows), or `libexec/bin/mvn` for a
 --- Homebrew keg. Its version is in the names of the files in `lib`: `maven-core-<version>.jar`
 --- for Maven 3 and 4, `maven-<version>-uber.jar` for Maven 2. Debian and Ubuntu name the core
 --- jar `maven-core-3.x.jar`, so on Linux the version then comes from `mvn -v`. Maven 1 names no
@@ -119,21 +119,28 @@ local function exists(path)
     return true
 end
 
---- The launcher of a Maven home, relative to the home.
-local function launcher()
-    if is_windows() then
-        return "bin\\mvn.cmd"
+--- The launchers a Maven home holds, relative to the home. Every distribution has bin/mvn. The
+--- Windows batch file is bin\mvn.cmd from Maven 3.1 on, and bin\mvn.bat before that and in
+--- Maven 2, so a home is found by any of the three.
+local LAUNCHERS = { "bin/mvn", "bin/mvn.cmd", "bin/mvn.bat" }
+
+--- Whether a directory holds one of the launchers.
+local function has_launcher(home)
+    for _, name in ipairs(LAUNCHERS) do
+        if exists(detect.join(home, name)) then
+            return true
+        end
     end
-    return "bin/mvn"
+    return false
 end
 
 --- Returns the Maven home that dir is: dir itself, or the libexec of a Homebrew keg. nil otherwise.
 local function maven_home(dir)
-    if exists(detect.join(dir, launcher())) then
+    if has_launcher(dir) then
         return dir
     end
     local libexec = detect.join(dir, "libexec")
-    if exists(detect.join(libexec, launcher())) then
+    if has_launcher(libexec) then
         return libexec
     end
     return nil
@@ -168,7 +175,7 @@ local function version_by_launcher(home)
     if is_windows() then
         return nil
     end
-    local handle = io.popen(shell_quote(detect.join(home, launcher())) .. " -v 2>/dev/null", "r")
+    local handle = io.popen(shell_quote(detect.join(home, "bin/mvn")) .. " -v 2>/dev/null", "r")
     if not handle then
         return nil
     end
