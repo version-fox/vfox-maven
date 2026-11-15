@@ -15,6 +15,7 @@
 package e2e
 
 import (
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -85,14 +86,31 @@ func TestParseReports(t *testing.T) {
 }
 
 func TestUnderDir(t *testing.T) {
-	dir := filepath.Join("a", "b")
-	for path, want := range map[string]bool{
-		filepath.Join("a", "b", "c", "mvn"): true,
-		filepath.Join("a", "bc", "mvn"):     false,
-		filepath.Join("a", "mvn"):           false,
+	root := t.TempDir()
+	dir := filepath.Join(root, "a", "b")
+	if err := os.MkdirAll(filepath.Join(dir, "c"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "a", "bc"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// The same directory under another name: through a symbolic link, and with a detour.
+	alias := filepath.Join(root, "alias")
+	if err := os.Symlink(dir, alias); err != nil {
+		t.Skipf("symbolic links are not available: %v", err)
+	}
+	for _, c := range []struct {
+		path, dir string
+		want      bool
+	}{
+		{filepath.Join(dir, "c", "mvn"), dir, true},
+		{filepath.Join(dir, "c", "mvn"), alias, true},
+		{filepath.Join(dir, "c", "mvn"), filepath.Join(root, "a", "..", "a", "b"), true},
+		{filepath.Join(root, "a", "bc", "mvn"), dir, false},
+		{filepath.Join(root, "a", "mvn"), dir, false},
 	} {
-		if got := underDir(path, dir); got != want {
-			t.Errorf("underDir(%s, %s) = %t, want %t", path, dir, got, want)
+		if got := underDir(c.path, c.dir); got != c.want {
+			t.Errorf("underDir(%s, %s) = %t, want %t", c.path, c.dir, got, c.want)
 		}
 	}
 }

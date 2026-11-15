@@ -229,12 +229,24 @@ func globalDir(home string) string {
 	return filepath.Join(home, ".vfox", "sdks", "maven")
 }
 
-// underDir reports whether path is inside dir. Windows paths are compared without regard to
-// case.
+// underDir reports whether path is inside dir, which must be one of its ancestors. The two
+// are compared as files, not as text: Windows gives a directory a short name as well as its
+// long one, and vfox may print either, as the working directory of a shell may be one or the
+// other.
 func underDir(path, dir string) bool {
-	path, dir = filepath.Clean(path), filepath.Clean(dir)
-	if runtime.GOOS == "windows" {
-		path, dir = strings.ToLower(path), strings.ToLower(dir)
+	target, err := os.Stat(dir)
+	if err != nil {
+		return false
 	}
-	return strings.HasPrefix(path, dir+string(filepath.Separator))
+	p := filepath.Dir(path)
+	for {
+		if info, err := os.Stat(p); err == nil && os.SameFile(info, target) {
+			return true
+		}
+		parent := filepath.Dir(p)
+		if parent == p {
+			return false
+		}
+		p = parent
+	}
 }
