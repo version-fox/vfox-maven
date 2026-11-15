@@ -82,7 +82,7 @@ The end-to-end check (`tests/e2e`) runs the real plugin against Apache's servers
 
 ## Releasing
 
-A maintainer publishes from **Actions → Plugin → Run workflow** on the default branch, entering a stable plugin version without the `v` prefix. The shared workflow, [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action), updates `metadata.lua`, creates the version commit and tag, and publishes the ZIP and manifest in this repository. No local tag or extra release token is needed. Pull requests run checks only; PR titles no longer trigger publication.
+A maintainer publishes from **Actions → Plugin → Run workflow** on the default branch, entering a stable plugin version without the `v` prefix. The shared workflow, [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action), updates `metadata.lua`, creates the version commit and tag, and publishes the ZIP and manifest in this repository. No local tag or extra release token is needed. Pull requests run checks only; a PR title does not trigger publication.
 
 Pushing a version tag that already matches `PLUGIN.version` publishes too. If publication fails, re-run the failed job to resume it.
 
