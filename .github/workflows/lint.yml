@@ -39,3 +39,24 @@ jobs:
           args: --check .
       - name: Check Lua
         run: mise x aqua:LuaLS/lua-language-server@3.19.1 -- lua-language-server --check . --checklevel=Warning
+
+  lint-go:
+    if: github.repository == 'version-fox/vfox-maven'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Check gofmt
+        run: test -z "$(gofmt -l .)"
+        working-directory: tests/e2e
+      - name: Run go vet
+        run: go vet ./...
+        working-directory: tests/e2e
+      - name: Run unit tests
+        run: go test -short ./...
+        working-directory: tests/e2e
