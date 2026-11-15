@@ -50,17 +50,17 @@ io.open = function(path, mode)
     }
 end
 
+-- A handle as vfox's io.popen gives it on Windows: read and close, and no lines, so a
+-- call of lines would fail here as it does there.
 local function handle(lines, output)
     local index = 0
     return {
-        lines = function()
-            return function()
-                index = index + 1
-                return lines[index]
+        read = function(_, format)
+            if format == "*a" then
+                return output
             end
-        end,
-        read = function()
-            return output
+            index = index + 1
+            return lines[index]
         end,
         close = function()
             return true

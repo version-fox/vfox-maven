@@ -43,19 +43,19 @@ io.open = function(path, mode)
     }
 end
 
+-- The handle has read and close only, as vfox's io.popen has on Windows, so the code cannot
+-- depend on lines.
 io.popen = function(cmd)
     local dir = cmd:match("'([^']+)'") or cmd:match('"([^"]+)"')
     local children = (dir and dirs[norm(dir)]) or {}
     local index = 0
     return {
-        lines = function()
-            return function()
-                index = index + 1
-                return children[index]
+        read = function(_, format)
+            if format == "*a" then
+                return ""
             end
-        end,
-        read = function()
-            return ""
+            index = index + 1
+            return children[index]
         end,
         close = function()
             return true

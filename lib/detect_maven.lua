@@ -85,7 +85,13 @@ function detect.list_names(dir)
         return {}
     end
     local names = {}
-    for line in handle:lines() do
+    -- vfox's io.popen on Windows returns a handle with read and close only, not lines, so the
+    -- lines are read one at a time.
+    while true do
+        local line = handle:read("*l")
+        if line == nil then
+            break
+        end
         line = trim(line)
         if line ~= "" and line ~= "." and line ~= ".." then
             table.insert(names, line)
