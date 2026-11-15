@@ -94,6 +94,13 @@ func TestE2E(t *testing.T) {
 	t.Run("prerelease order", func(t *testing.T) {
 		checkPrereleaseOrder(t, binary, zipPath)
 	})
+	t.Run("system maven linked and used", func(t *testing.T) {
+		install, err := v.installDir("maven@" + archivedMaven3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		checkSystemMaven(t, binary, zipPath, mavenHomeOf(install, archivedMaven3))
+	})
 }
 
 // checkRelease installs one release, and checks three things: that vfox verified its checksum,

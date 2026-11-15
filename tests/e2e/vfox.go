@@ -33,8 +33,14 @@ type vfox struct {
 
 // run runs vfox with args and returns what it printed to stdout and stderr.
 func (v vfox) run(args ...string) (string, error) {
+	return v.runWith(nil, args...)
+}
+
+// runWith runs vfox with args, and with the variables of extra added to its environment, such as
+// M2_HOME.
+func (v vfox) runWith(extra []string, args ...string) (string, error) {
 	cmd := exec.Command(v.binary, args...)
-	cmd.Env = withHome(os.Environ(), v.home)
+	cmd.Env = append(withHome(os.Environ(), v.home), extra...)
 	output, err := cmd.CombinedOutput()
 	return string(output), err
 }
