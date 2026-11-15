@@ -11,3 +11,4 @@
 - 版本按 Maven 自己的发布顺序比较：`3.10.1` 比 `3.9.16` 新，`4.0.0` 比 `4.0.0-rc-7` 新。
 - `vfox link --detect maven` 会采用本机上已有的 Maven：`M2_HOME` 和 `MAVEN_HOME`、系统包、Homebrew、SDKMAN、asdf、mise、Scoop 和 Chocolatey。见 [link.md](link.md)。
 - 列表读不到时，停止查找并报告 HTTP 状态，而不是报内部的 Lua 错误。
+- `vfox search maven` 先列稳定版，再列预览版，各自从新到旧。所以 `vfox install maven@latest` 安装最新的稳定版，而不是 `4.0.0-rc-7` 这样的预览版。预览版仍然列出。见 [versions.md](versions.md)。

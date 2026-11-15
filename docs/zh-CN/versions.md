@@ -2,7 +2,7 @@
 
 [中文](versions.md) | [English](../versions.md)
 
-`vfox search maven` 列出 Apache 发布的每个 Maven 1、2、3 和 4 版本，最新的在前。列表来自两个地方：
+`vfox search maven` 列出 Apache 发布的每个 Maven 1、2、3 和 4 版本。稳定版在前，从新到旧；预览版接在后面，同样从新到旧。列表来自两个地方：
 
 - [dlcdn.apache.org](https://dlcdn.apache.org/maven/)：镜像网络，列出当前的版本；
 - [archive.apache.org](https://archive.apache.org/dist/maven/)：保存每个版本，包括旧版本。
@@ -19,6 +19,8 @@
 vfox install maven@3.10.1
 vfox install maven@3.0.5
 ```
+
+`latest` 指列表里的第一个版本，所以 `vfox install maven@latest` 安装最新的稳定版。预览版按名字安装，比如 `vfox install maven@4.0.0-rc-7`。
 
 如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。Maven 2 到 4 的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`，只有一个例外。Maven 2.0.11 安装的是 `apache-maven-2.0.11-bin.zip`，因为它的 `tar.gz` 里有一个多余的零块，vfox 的解包会拒绝它。
 

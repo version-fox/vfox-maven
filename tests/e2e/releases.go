@@ -33,7 +33,7 @@ var historical = []string{archivedMaven3, "2.2.1", "2.0.11", "1.1"}
 var listingLine = regexp.MustCompile(`^\s*-\s+(\S+)\s*$`)
 
 // parseListing returns the releases that the output of vfox search maven lists, in the
-// order that vfox prints them, which is newest first.
+// order that vfox prints them: the stable releases newest first, then the pre-releases newest first.
 func parseListing(output string) []string {
 	var versions []string
 	scanner := bufio.NewScanner(strings.NewReader(output))
@@ -52,7 +52,8 @@ func majorOf(version string) string {
 }
 
 // newestOf returns the first release of a major version in the listing. vfox prints the
-// listing newest first, so that is the newest release of the major version.
+// stable releases first, newest first, then the pre-releases, so that is the newest stable
+// release of the major version, or its newest pre-release when it has no stable release.
 func newestOf(versions []string, major string) (string, error) {
 	for _, version := range versions {
 		if majorOf(version) == major {

@@ -6,7 +6,7 @@
 
 ```
 metadata.lua              插件名、版本和许可证
-hooks/available.lua       vfox search：Maven 1 到 4 的版本，最新的在前
+hooks/available.lua       vfox search：Maven 1 到 4 的版本，稳定版在前，预览版在后，各自从新到旧
 hooks/pre_install.lua     vfox install：压缩包的地址和它的校验和
 hooks/env_keys.lua        PATH：安装目录下的 bin 目录
 hooks/pre_use.lua         vfox use：符合该写法的、已安装的最新版本，按 Maven 的顺序

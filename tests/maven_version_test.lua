@@ -53,4 +53,17 @@ orders("2.2.1", "2.0.11", 1)
 orders("3.0.5", "3.5.0-beta-1", -1)
 orders("1.1", "2.0.11", -1)
 
+-- A pre-release has words after its numbers, and a release has nothing after them.
+local function prerelease(version, want)
+    local got = maven_version.is_prerelease(version)
+    assert(got == want, ("is_prerelease(%q): expected %s, got %s"):format(version, tostring(want), tostring(got)))
+    cases = cases + 1
+end
+prerelease("4.0.0-rc-7", true)
+prerelease("4.0.0-alpha-10", true)
+prerelease("3.5.0-beta-1", true)
+prerelease("3.10.1", false)
+prerelease("4.0", false)
+prerelease("1.1", false)
+
 print("PASS: " .. cases .. " Maven version cases")

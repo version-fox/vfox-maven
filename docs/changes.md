@@ -11,3 +11,4 @@ What changed in each release, as a user notices it. GitHub's release pages list 
 - Versions are ordered the way Maven orders its releases: `3.10.1` is newer than `3.9.16`, and `4.0.0` is newer than `4.0.0-rc-7`.
 - `vfox link --detect maven` adopts the Mavens that are already on the machine: `M2_HOME` and `MAVEN_HOME`, the system package, Homebrew, SDKMAN, asdf, mise, Scoop and Chocolatey. See [link.md](link.md).
 - A listing that cannot be read stops the search with its HTTP status, not with an internal Lua error.
+- `vfox search maven` lists the stable releases first, then the pre-releases, each newest first. So `vfox install maven@latest` installs the newest stable release, not a pre-release such as `4.0.0-rc-7`. Pre-releases stay listed. See [versions.md](versions.md).

@@ -6,7 +6,7 @@
 
 ```
 metadata.lua              plugin name, version and license
-hooks/available.lua       vfox search: the releases of Maven 1 to 4, newest first
+hooks/available.lua       vfox search: the releases of Maven 1 to 4, stable first, newest first, then the pre-releases
 hooks/pre_install.lua     vfox install: the URL of the archive and its checksum
 hooks/env_keys.lua        PATH: the bin directory of the install
 hooks/pre_use.lua         vfox use: the installed release that a spec names, the newest in Maven's order
