@@ -25,8 +25,9 @@ import (
 const archivedMaven3 = "3.0.5"
 
 // historical are releases that only archive.apache.org keeps, and each of them uses a
-// layout that the plugin reads: 3.0.5 and 2.2.1 the usual one, 1.1 the one of Maven 1.
-var historical = []string{archivedMaven3, "2.2.1", "1.1"}
+// layout that the plugin reads: 3.0.5 and 2.2.1 the usual one, 2.0.11 its zip, and 1.1 the one
+// of Maven 1.
+var historical = []string{archivedMaven3, "2.2.1", "2.0.11", "1.1"}
 
 // listingLine matches one release in the output of vfox search maven: " - <version>".
 var listingLine = regexp.MustCompile(`^\s*-\s+(\S+)\s*$`)
