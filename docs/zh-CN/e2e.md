@@ -13,11 +13,12 @@
 3. `vfox use --global` 选中版本：在已激活 vfox 的 shell 里，Maven 命令（`mvn`，Maven 1 是 `maven`）解析到该版本，报告该版本并能运行；
 4. 插件的 EnvKeys 钩子通过 `vfox plugin run` 运行，把该版本的 bin 目录放进 `PATH`。
 
-然后是三个场景，检查 `vfox use` 的其他作用域：
+然后是四个场景，检查 `vfox use` 的其他作用域，以及写法如何找到对应的版本：
 
 - 为会话选中的版本（`vfox use`）覆盖全局选择，会话随 shell 结束；
 - `vfox use --project` 为项目目录选中版本，写入 `.vfox.toml`，项目之外仍然使用全局选择；
 - `vfox use` 只写大版本号（`maven@3`）时，选中已安装的该大版本的最新版本。
+- `vfox use` 选择 `maven@4` 时，若装了 `4.0.0-alpha-2` 和 `4.0.0-alpha-13`，选中按 Maven 顺序更新的 `4.0.0-alpha-13`。这个场景在独立的家目录里运行，那里没有装其他 Maven 4 版本。
 
 `vfox use` 只在已激活 vfox 的 shell 里生效，就像用户的 shell 那样，所以场景在这样的 shell 里运行：Linux 和 macOS 用 bash，Windows 用 PowerShell 7。脚本依次执行 `vfox activate`、`vfox use`、`vfox env`（脚本不会触发应用 `vfox env` 的提示符钩子），然后运行 Maven 命令。`VFOX_MAVEN_SHELL`（`bash` 或 `pwsh`）可以覆盖这个选择，因此 PowerShell 的路径也能在 Linux 上运行。这些 shell 的环境里会去掉 vfox 会话的变量（`__VFOX_*`），因此不会继承启动检查的那个 shell 的会话。
 
@@ -74,5 +75,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 ## 已知的限制
 
 - 检查只安装最新的 Maven 3 和 Maven 4 版本，以及三个归档版本，而不是 `vfox search` 列出的每一个版本。
-- 场景使用插件默认的 `PreUse`，它什么也不做：版本的匹配由 vfox 负责。
 - 在 Windows arm64 上，Maven 1.1 用 x64 的 JDK 8 通过模拟运行，因为 Temurin 没有该平台的 JDK 8。

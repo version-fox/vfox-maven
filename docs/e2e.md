@@ -13,11 +13,12 @@ For the newest Maven 4 and Maven 3 releases that `vfox search maven` lists, and 
 3. `vfox use --global` selects the release: in a shell with vfox activated, the Maven command (`mvn`, or `maven` for Maven 1) resolves to the release, reports it, and runs it;
 4. the EnvKeys hook of the plugin, run through `vfox plugin run`, puts the bin directory of the release on `PATH`.
 
-Three scenarios then check the other scopes of `vfox use`:
+Four scenarios then check the other scopes of `vfox use`, and how a spec finds its release:
 
 - a release selected for the session (`vfox use`) wins over the global selection, and the session ends with its shell;
 - `vfox use --project` selects a release for a project directory, in its `.vfox.toml`, and the global selection still applies outside that directory;
 - `vfox use` with a major version alone (`maven@3`) selects the newest installed release of that major version.
+- `vfox use` with `maven@4`, when 4.0.0-alpha-2 and 4.0.0-alpha-13 are installed, selects 4.0.0-alpha-13, the newer of the two in Maven's order. This one runs in a home of its own, where no other Maven 4 release is installed.
 
 `vfox use` takes effect only in a shell that has vfox activated, as a user's shell has it, so the scenarios run in one: bash on Linux and macOS, and PowerShell 7 on Windows. The script runs `vfox activate`, then `vfox use`, then `vfox env`, because a script does not run the prompt hook that applies `vfox env`, and then the Maven command. `VFOX_MAVEN_SHELL` (`bash` or `pwsh`) overrides the choice, so the PowerShell path can run on Linux. The variables of a vfox session (`__VFOX_*`) are removed from the environment of these shells, so a session of the shell that starts the check is not inherited.
 
@@ -74,5 +75,4 @@ docker run --rm --volume "$PWD:/src:ro" --volume /tmp/e2e.test:/usr/local/bin/e2
 ## Known gaps
 
 - The check installs the newest Maven 3 and Maven 4 releases and the three archived ones, not every release that `vfox search` lists.
-- The scenarios use the default `PreUse` of the plugin, which does nothing: the matching of versions is vfox's.
 - On Windows arm64, Maven 1.1 runs on the x64 JDK 8 under emulation, because Temurin publishes no JDK 8 for that platform.

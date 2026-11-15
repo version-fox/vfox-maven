@@ -9,7 +9,7 @@ metadata.lua              插件名、版本和许可证
 hooks/available.lua       vfox search：Maven 1 到 4 的版本，最新的在前
 hooks/pre_install.lua     vfox install：压缩包的地址和它的校验和
 hooks/env_keys.lua        PATH：安装目录下的 bin 目录
-hooks/pre_use.lua         vfox use：没有需要映射的内容，版本原样使用
+hooks/pre_use.lua         vfox use：符合该写法的、已安装的最新版本，按 Maven 的顺序
 hooks/post_install.lua    vfox 解压压缩包之后：无需操作
 lib/util.lua              两个源、它们的列表、压缩包和校验文件
 lib/maven_version.lua     Maven 版本的顺序，包括预览版
@@ -32,7 +32,9 @@ vfox 读取 `metadata.lua`，在某个命令需要时调用对应的钩子，并
 | --- | --- |
 | `vfox search maven` | `Available`，读取 dlcdn.apache.org 和 archive.apache.org 的列表 |
 | `vfox install maven@3.10.1` | `PreInstall` 找到列出该版本的源，返回它的地址和校验和。vfox 下载、核对校验和并解压，然后调用 `PostInstall` |
-| `vfox use maven@3.10.1` | `PreUse`（没有需要映射的内容），然后是 `EnvKeys`，它提供 `PATH` |
+| `vfox use maven@3.10.1` | `PreUse`，找出该写法对应的已安装版本，然后是 `EnvKeys`，它提供 `PATH` |
+
+`PreUse` 负责 `vfox use` 的版本匹配。vfox 自己也会匹配，但它只比较版本的数字，所以 `maven@4` 可能选中 `4.0.0-alpha-2` 而不是 `4.0.0-alpha-13`。钩子按 Maven 的顺序选出已安装的最新版本；端到端检查会装上这两个版本，并检查 `vfox use maven@4` 选中的是哪一个。
 
 安装用哪个源，跟随的是 dlcdn.apache.org 的列表，而不是校验文件。dlcdn.apache.org 会把一些旧版本的校验文件重定向到归档，而归档本身并不在 dlcdn.apache.org 上；所以 dlcdn.apache.org 给出的校验文件，并不能说明归档在哪里。
 

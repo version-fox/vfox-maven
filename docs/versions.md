@@ -22,6 +22,14 @@ vfox install maven@3.0.5
 
 The archive comes from dlcdn.apache.org when that lists the release, and from archive.apache.org otherwise. Maven 2 to 4 lay out their archives the same way: `maven-<major>/<version>/binaries/apache-maven-<version>-bin.tar.gz`.
 
+## Using a version
+
+`vfox use` uses the release installed under the name as typed. Otherwise it uses the newest installed release that the spec names, in the order above: with 4.0.0-alpha-2 and 4.0.0-alpha-13 installed, `maven@4` uses 4.0.0-alpha-13. A spec names whole parts, so `3.1` does not name `3.10.1`. When no installed release fits, vfox reports the version as not installed, and does not install it.
+
+```bash
+vfox use --global maven@4
+```
+
 ## Checksums
 
 Apache publishes a checksum file beside each archive: `.sha512` for most releases, and `.sha1` or `.md5` for the older ones. The plugin reads the strongest file that exists at the source it chose, and gives its digest to vfox. vfox checks the download against it, and the install stops if the two differ.

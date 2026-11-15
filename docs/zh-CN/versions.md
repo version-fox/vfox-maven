@@ -22,6 +22,14 @@ vfox install maven@3.0.5
 
 如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。Maven 2 到 4 的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`。
 
+## 使用某个版本
+
+`vfox use` 优先使用以写出的名字安装的版本。否则使用符合该写法、已安装的最新版本，排序如上：装了 `4.0.0-alpha-2` 和 `4.0.0-alpha-13` 时，`maven@4` 使用 `4.0.0-alpha-13`。写法按整段匹配，所以 `3.1` 不匹配 `3.10.1`。没有符合的已安装版本时，vfox 报告该版本未安装，不会去安装它。
+
+```bash
+vfox use --global maven@4
+```
+
 ## 校验和
 
 Apache 在每个压缩包旁边发布校验和文件：大多数版本是 `.sha512`，较旧的版本是 `.sha1` 或 `.md5`。插件读取所选源里存在的最强的那个文件，把其中的摘要交给 vfox。vfox 用它核对下载的内容，两者不一致时安装会停止。

@@ -9,7 +9,7 @@ metadata.lua              plugin name, version and license
 hooks/available.lua       vfox search: the releases of Maven 1 to 4, newest first
 hooks/pre_install.lua     vfox install: the URL of the archive and its checksum
 hooks/env_keys.lua        PATH: the bin directory of the install
-hooks/pre_use.lua         vfox use: nothing to map, the version is used as it is
+hooks/pre_use.lua         vfox use: the installed release that a spec names, the newest in Maven's order
 hooks/post_install.lua    after vfox unpacks the archive: nothing to do
 lib/util.lua              the two sources, their listings, the archives and the checksum files
 lib/maven_version.lua     the order of Maven versions, pre-releases included
@@ -32,7 +32,9 @@ vfox loads `metadata.lua`, calls a hook when a command needs it, and puts `PLUGI
 | --- | --- |
 | `vfox search maven` | `Available`, which reads the listings of dlcdn.apache.org and archive.apache.org |
 | `vfox install maven@3.10.1` | `PreInstall` finds the source that lists the release, and returns its URL and the checksum. vfox downloads, checks the checksum and unpacks, then calls `PostInstall` |
-| `vfox use maven@3.10.1` | `PreUse` (nothing to map), then `EnvKeys`, which provides `PATH` |
+| `vfox use maven@3.10.1` | `PreUse`, which finds the installed release that the spec names, then `EnvKeys`, which provides `PATH` |
+
+`PreUse` does the matching for `vfox use`. vfox matches a spec on its own too, but it compares only the numbers of versions, so `maven@4` could take 4.0.0-alpha-2 over 4.0.0-alpha-13. The hook picks the newest installed release in Maven's order, and the end-to-end check installs both and checks which one `vfox use maven@4` selects.
 
 The source of an install follows the listing of dlcdn.apache.org, not the checksum files. dlcdn.apache.org redirects the checksum files of some older releases to the archive, while the archive itself is not on dlcdn.apache.org; so a checksum that dlcdn.apache.org answers does not show where the archive is.
 
