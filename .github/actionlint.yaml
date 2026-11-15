@@ -13,9 +13,10 @@
 # limitations under the License.
 #
 # actionlint configuration (https://github.com/rhysd/actionlint). The arm64 runner
-# label below is an official GitHub-hosted label (see actions/runner-images), but
-# actionlint's bundled label list lags behind it; declaring it here keeps actionlint
+# labels below are official GitHub-hosted labels (see actions/runner-images), but
+# actionlint's bundled label list lags behind them; declaring them here keeps actionlint
 # green for the workflows. GitHub itself ignores this file.
 self-hosted-runner:
   labels:
     - ubuntu-26.04-arm
+    - windows-11-arm

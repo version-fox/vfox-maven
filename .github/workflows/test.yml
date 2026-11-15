@@ -44,6 +44,11 @@ jobs:
             runs-on: windows-latest
             asset: vfox_1.1.0_windows_x86_64.zip
             sha256: 1bbec8fffddbb62de0d93030c3f6203c69680662bc65257ca4a5e611cb607d0a
+          # windows-11-arm is the Windows arm64 runner of GitHub-hosted runners.
+          - name: Windows arm64
+            runs-on: windows-11-arm
+            asset: vfox_1.1.0_windows_aarch64.zip
+            sha256: 67bf5c8b3bde5c1b3fc06dcaa460db9bb1dc9fc587b467d1dc96205377767465
     env:
       # The release is pinned here with the checksum of each asset, as the actions
       # are pinned by their commits; change the pins together to move to another release.
