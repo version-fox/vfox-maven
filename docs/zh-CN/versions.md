@@ -2,7 +2,7 @@
 
 [中文](versions.md) | [English](../versions.md)
 
-`vfox search maven` 列出 Apache 发布的每个 Maven 2、3 和 4 版本，最新的在前。列表来自两个地方：
+`vfox search maven` 列出 Apache 发布的每个 Maven 1、2、3 和 4 版本，最新的在前。列表来自两个地方：
 
 - [dlcdn.apache.org](https://dlcdn.apache.org/maven/)：镜像网络，列出当前的版本；
 - [archive.apache.org](https://archive.apache.org/dist/maven/)：保存每个版本，包括旧版本。
@@ -20,12 +20,14 @@ vfox install maven@3.10.1
 vfox install maven@3.0.5
 ```
 
-如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。两者的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`。
+如果 dlcdn.apache.org 列出了这个版本，压缩包就来自那里；否则来自 archive.apache.org。Maven 2 到 4 的压缩包布局相同：`maven-<主版本>/<版本>/binaries/apache-maven-<版本>-bin.tar.gz`。
 
 ## 校验和
 
 Apache 在每个压缩包旁边发布校验和文件：大多数版本是 `.sha512`，较旧的版本是 `.sha1` 或 `.md5`。插件读取所选源里存在的最强的那个文件，把其中的摘要交给 vfox。vfox 用它核对下载的内容，两者不一致时安装会停止。
 
-## 不列出的版本
+## Maven 1
 
-Maven 1 不列出。它唯一的版本 1.1 的压缩包布局不同，运行的命令是 `maven` 而不是 `mvn`。
+Maven 1 只有一个版本，1.1。它的压缩包是 `maven-1/1.1/binaries/maven-1.1.tar.gz`，唯一的校验文件是 `.md5`，其中摘要以字节对的形式写在文件名之后；运行的命令是 `maven`。
+
+Maven 1.1 只能在 JDK 8 上运行。它的启动脚本会传 `-Djava.endorsed.dirs`，JDK 9 及以后拒绝这个选项；它还要读 `lib/tools.jar`，所以需要的是 JDK 而不是 JRE。运行前请把 `JAVA_HOME` 指向一个 JDK 8。

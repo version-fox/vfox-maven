@@ -2,7 +2,7 @@
 
 [中文](README_CN.md) | [English](README.md)
 
-vfox-maven is a plugin for [vfox](https://vfox.lhan.me/). It installs [Apache Maven](https://maven.apache.org/): the Maven 2, 3 and 4 releases that Apache publishes on [dlcdn.apache.org](https://dlcdn.apache.org/maven/) and [archive.apache.org](https://archive.apache.org/dist/maven/), the old ones included.
+vfox-maven is a plugin for [vfox](https://vfox.lhan.me/). It installs [Apache Maven](https://maven.apache.org/): the Maven 1, 2, 3 and 4 releases that Apache publishes on [dlcdn.apache.org](https://dlcdn.apache.org/maven/) and [archive.apache.org](https://archive.apache.org/dist/maven/), the old ones included.
 
 # Install
 
@@ -12,7 +12,7 @@ After installing vfox, run the following command to add the plugin:
 vfox add maven
 ```
 
-Maven runs on a Java runtime, which this plugin does not install. Put a JDK on `PATH` or set `JAVA_HOME`. The [vfox-java](https://github.com/version-fox/vfox-java) plugin installs one.
+Maven runs on a Java runtime, which this plugin does not install. Put a JDK on `PATH` or set `JAVA_HOME`. The [vfox-java](https://github.com/version-fox/vfox-java) plugin installs one. Maven 1.1 runs on JDK 8 only.
 
 # Usage
 

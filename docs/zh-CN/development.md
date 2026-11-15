@@ -6,15 +6,15 @@
 
 ```
 metadata.lua              插件名、版本和许可证
-hooks/available.lua       vfox search：Maven 2、3 和 4 的版本，最新的在前
+hooks/available.lua       vfox search：Maven 1 到 4 的版本，最新的在前
 hooks/pre_install.lua     vfox install：压缩包的地址和它的校验和
 hooks/env_keys.lua        PATH：安装目录下的 bin 目录
 hooks/pre_use.lua         vfox use：没有需要映射的内容，版本原样使用
 hooks/post_install.lua    vfox 解压压缩包之后：无需操作
-lib/util.lua              两个源、它们的列表，以及校验文件
+lib/util.lua              两个源、它们的列表、压缩包和校验文件
 lib/maven_version.lua     Maven 版本的顺序，包括预览版
 tests/*_test.lua          离线测试，由 vfox plugin test 运行
-tests/e2e/                端到端检查及其镜像，见 e2e.md
+tests/e2e/                端到端检查（一个 Go 测试）及其镜像，见 e2e.md
 .devcontainer/            开发容器，见 e2e.md
 .github/workflows/        lint、test、license、e2e 和发布
 opencode.jsonc            让这个仓库里的 OpenCode 代理会话可以不经询问地运行 git push、gh pr create 和 gh pr comment
@@ -47,7 +47,15 @@ vfox plugin test .                                  # 离线测试（test.yml）
 license-eye header check                            # 许可证头（license.yml）
 ```
 
-格式不对时，运行 `stylua .` 修正。缺少许可证头时，运行 `license-eye header fix` 补上。
+端到端检查的 Go 代码在 `tests/e2e` 下检查：
+
+```bash
+gofmt -l .        # 格式正确时不输出任何内容
+go vet ./...
+go test -short ./...
+```
+
+格式不对时，运行 `stylua .` 或 `gofmt -w .` 修正。缺少许可证头时，运行 `license-eye header fix` 补上。
 
 在链接的 git worktree 里，`.git` 是一个指向主仓库的文件。如果容器里看不到那个主仓库，许可证检查会把它报为没有头的文件。请在 clone 出来的副本上运行，和 CI 一样。
 
@@ -65,6 +73,8 @@ local plugin = test.load({
 local result = plugin:PreInstall({ version = "3.10.1" })
 ```
 
+端到端检查（`tests/e2e`）用真实的插件访问 Apache 的服务器，见 [e2e.md](e2e.md)。
+
 ## 发布
 
 维护者在默认分支上打开 **Actions → Plugin → Run workflow**，输入不带 `v` 前缀的稳定版本号。共享工作流 [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action) 会更新 `metadata.lua`、创建版本提交和标签，并在本仓库发布 ZIP 和清单。不需要在本地打标签，也不需要额外的发布令牌。拉取请求只运行检查，PR 标题不再触发发布。
@@ -75,8 +85,8 @@ local result = plugin:PreInstall({ version = "3.10.1" })
 
 ## 已知的限制
 
-- 不支持 Maven 1，见 [versions.md](versions.md#不列出的版本)。
-- CI 只在 Linux amd64 上运行端到端检查。
+- Maven 1.1 只能在 JDK 8 上运行，见 [versions.md](versions.md#maven-1)。
+- CI 在 Linux amd64 和 arm64 上，以及 Windows x86_64 上运行端到端检查。
 
 ## 文档的写法
 

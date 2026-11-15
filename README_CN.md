@@ -2,7 +2,7 @@
 
 [中文](README_CN.md) | [English](README.md)
 
-vfox-maven 是 [vfox](https://vfox.lhan.me/) 的一个插件，用来安装 [Apache Maven](https://maven.apache.org/)：也就是 Apache 在 [dlcdn.apache.org](https://dlcdn.apache.org/maven/) 和 [archive.apache.org](https://archive.apache.org/dist/maven/) 上发布的 Maven 2、3 和 4 版本，包括旧版本。
+vfox-maven 是 [vfox](https://vfox.lhan.me/) 的一个插件，用来安装 [Apache Maven](https://maven.apache.org/)：也就是 Apache 在 [dlcdn.apache.org](https://dlcdn.apache.org/maven/) 和 [archive.apache.org](https://archive.apache.org/dist/maven/) 上发布的 Maven 1、2、3 和 4 版本，包括旧版本。
 
 # 安装
 
@@ -12,7 +12,7 @@ vfox-maven 是 [vfox](https://vfox.lhan.me/) 的一个插件，用来安装 [Apa
 vfox add maven
 ```
 
-Maven 需要 Java 运行时，这个插件不会安装它。请把 JDK 放进 `PATH`，或者设置 `JAVA_HOME`。[vfox-java](https://github.com/version-fox/vfox-java) 插件可以安装 JDK。
+Maven 需要 Java 运行时，这个插件不会安装它。请把 JDK 放进 `PATH`，或者设置 `JAVA_HOME`。[vfox-java](https://github.com/version-fox/vfox-java) 插件可以安装 JDK。Maven 1.1 只能在 JDK 8 上运行。
 
 # 用法
 

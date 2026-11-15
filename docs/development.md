@@ -6,16 +6,16 @@
 
 ```
 metadata.lua              plugin name, version and license
-hooks/available.lua       vfox search: the releases of Maven 2, 3 and 4, newest first
+hooks/available.lua       vfox search: the releases of Maven 1 to 4, newest first
 hooks/pre_install.lua     vfox install: the URL of the archive and its checksum
 hooks/env_keys.lua        PATH: the bin directory of the install
 hooks/pre_use.lua         vfox use: nothing to map, the version is used as it is
 hooks/post_install.lua    after vfox unpacks the archive: nothing to do
-lib/util.lua              the two sources, their listings, and the checksum files
+lib/util.lua              the two sources, their listings, the archives and the checksum files
 lib/maven_version.lua     the order of Maven versions, pre-releases included
 tests/*_test.lua          offline tests, run by vfox plugin test
-tests/e2e/                the end-to-end check and its image, see e2e.md
-.devcontainer/            the dev container, see e2e.md
+tests/e2e/                the end-to-end check, a Go test, and its image; see e2e.md
+.devcontainer/            the dev container; see e2e.md
 .github/workflows/        lint, test, license, e2e, and the release
 opencode.jsonc            lets OpenCode agent sessions in this repository run git push, gh pr create and gh pr comment without asking
 Injection.lua             type hints for what vfox injects; never loaded
@@ -47,7 +47,15 @@ vfox plugin test .                                  # offline tests (test.yml)
 license-eye header check                            # license headers (license.yml)
 ```
 
-To fix the formatting, run `stylua .`. To add missing license headers, run `license-eye header fix`.
+The Go code of the end-to-end check is checked from `tests/e2e`:
+
+```bash
+gofmt -l .        # prints nothing when the formatting is right
+go vet ./...
+go test -short ./...
+```
+
+To fix the formatting, run `stylua .` or `gofmt -w .`. To add missing license headers, run `license-eye header fix`.
 
 In a linked git worktree, `.git` is a file that points at the main repository. A license check in a container that cannot see that repository reports it as a file without a header. Run the check on a clone, as CI does.
 
@@ -65,6 +73,8 @@ local plugin = test.load({
 local result = plugin:PreInstall({ version = "3.10.1" })
 ```
 
+The end-to-end check (`tests/e2e`) runs the real plugin against Apache's servers; see [e2e.md](e2e.md).
+
 ## Releasing
 
 A maintainer publishes from **Actions → Plugin → Run workflow** on the default branch, entering a stable plugin version without the `v` prefix. The shared workflow, [plugin-manifest-action](https://github.com/version-fox/plugin-manifest-action), updates `metadata.lua`, creates the version commit and tag, and publishes the ZIP and manifest in this repository. No local tag or extra release token is needed. Pull requests run checks only; PR titles no longer trigger publication.
@@ -75,8 +85,8 @@ The workflow follows the shared `@v1` release tool, and updating the tool does n
 
 ## Known gaps
 
-- Maven 1 is not supported, see [versions.md](versions.md#not-listed).
-- CI runs the end-to-end check on Linux amd64 only.
+- Maven 1.1 runs on JDK 8 only, see [versions.md](versions.md#maven-1).
+- CI runs the end-to-end check on Linux amd64 and arm64, and on Windows x86_64.
 
 ## Writing the docs
 
