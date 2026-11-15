@@ -103,6 +103,15 @@ assert(result.url == archive(ARCHIVE, "2", "2.2.1"), result.url)
 assert(result.md5 == MD5, result.md5)
 cases = cases + 1
 
+-- Maven 2.0.11 is installed from its zip: its tar.gz has a stray zero block that vfox cannot unpack.
+local ZIP_2_0_11 = ARCHIVE .. "maven-2/2.0.11/binaries/apache-maven-2.0.11-bin.zip"
+answers[ZIP_2_0_11 .. ".sha1"] = "21c148be57ffd5639cc43b2fc98d19951861562d\n"
+result = plugin:PreInstall({ version = "2.0.11" })
+assert(result.version == "2.0.11", result.version)
+assert(result.url == ZIP_2_0_11, result.url)
+assert(result.sha1 == "21c148be57ffd5639cc43b2fc98d19951861562d", result.sha1)
+cases = cases + 1
+
 -- A pre-release that dlcdn.apache.org lists keeps its name in the address.
 answers[CURRENT .. "maven-4/"] = listing({ "4.0.0-rc-7" })
 answers[archive(CURRENT, "4", "4.0.0-rc-7") .. ".sha512"] = SHA512 .. "\n"

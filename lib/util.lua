@@ -27,6 +27,11 @@ util.SOURCES = { util.CURRENT, util.ARCHIVE }
 -- archiveURL): its one release, 1.1, runs as `maven`, not `mvn`.
 util.MAJORS = { "1", "2", "3", "4" }
 
+-- The releases whose archive is a zip, not the tar.gz that the others use. The tar.gz of Maven
+-- 2.0.11 has a stray zero block after its fourteenth entry: GNU tar reads it with a warning, but
+-- Go's archive/tar, which vfox unpacks with, stops there with "invalid tar header". The zip is whole.
+util.ZIP_RELEASES = { ["2.0.11"] = true }
+
 -- The checksum files Apache publishes beside an archive, the strongest first,
 -- with the length of their digests in hexadecimal digits. Older releases publish
 -- a .sha1 or a .md5 file instead of a .sha512.
@@ -46,7 +51,8 @@ function util:archiveURL(source, major, version)
         -- Maven 1 names its archive after itself, not apache-maven-<version>-bin.
         return source .. ("maven-1/%s/binaries/maven-%s.tar.gz"):format(version, version)
     end
-    return source .. ("maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz"):format(major, version, version)
+    local extension = util.ZIP_RELEASES[version] and "zip" or "tar.gz"
+    return source .. ("maven-%s/%s/binaries/apache-maven-%s-bin.%s"):format(major, version, version, extension)
 end
 
 --- The major version of a version the plugin installs, or nil for any other.
