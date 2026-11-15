@@ -51,5 +51,6 @@ orders("3.10.0-rc-1", "3.9.16", 1)
 orders("3.5.0-alpha-1", "3.5.0-beta-1", -1)
 orders("2.2.1", "2.0.11", 1)
 orders("3.0.5", "3.5.0-beta-1", -1)
+orders("1.1", "2.0.11", -1)
 
 print("PASS: " .. cases .. " Maven version cases")

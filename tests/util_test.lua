@@ -88,7 +88,14 @@ assert(util:digestIn(MD5:upper(), 32) == MD5, "an upper case digest")
 -- The length tells the digests apart: a SHA-1 is not an MD5.
 assert(util:digestIn(SHA1, 32) == nil, "a digest of another length")
 assert(util:digestIn("<html>no digest here</html>", 40) == nil, "a file with no digest")
-cases = cases + 6
+-- Maven 1's .md5 writes the digest in byte pairs after the file name.
+assert(
+    util:digestIn("maven-1.1.tar.gz: EC 2B 0A D8 C7 8B A5 24  97 F6 3E E7 F6 13 B5 26\n", 32)
+        == "ec2b0ad8c78ba52497f63ee7f613b526",
+    "byte pairs after a colon"
+)
+assert(util:digestIn("maven-1.1.tar.gz: EC 2B 0A\n", 32) == nil, "byte pairs of another length")
+cases = cases + 8
 
 -- A checksum file that is missing is no digest; one that has none is an error.
 assert(util:fetchDigest(ARCHIVE_3_0_5 .. ".sha512", 128) == nil, "a missing file")

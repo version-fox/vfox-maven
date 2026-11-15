@@ -23,9 +23,9 @@ util.CURRENT = "https://dlcdn.apache.org/maven/"
 util.ARCHIVE = "https://archive.apache.org/dist/maven/"
 util.SOURCES = { util.CURRENT, util.ARCHIVE }
 
--- The major versions the plugin installs. Maven 1 is left out: its one release,
--- 1.1, has another layout and runs as `maven`, not `mvn`.
-util.MAJORS = { "2", "3", "4" }
+-- The major versions the plugin installs. Maven 1 has a layout of its own (see
+-- archiveURL): its one release, 1.1, runs as `maven`, not `mvn`.
+util.MAJORS = { "1", "2", "3", "4" }
 
 -- The checksum files Apache publishes beside an archive, the strongest first,
 -- with the length of their digests in hexadecimal digits. Older releases publish
@@ -42,6 +42,10 @@ util.ALGORITHMS = {
 --- @param version string The release, such as 3.10.1
 --- @return string
 function util:archiveURL(source, major, version)
+    if major == "1" then
+        -- Maven 1 names its archive after itself, not apache-maven-<version>-bin.
+        return source .. ("maven-1/%s/binaries/maven-%s.tar.gz"):format(version, version)
+    end
     return source .. ("maven-%s/%s/binaries/apache-maven-%s-bin.tar.gz"):format(major, version, version)
 end
 
@@ -122,7 +126,8 @@ function util:listVersions(major)
 end
 
 --- Finds the digest in a checksum file, however the file writes it: the digest
---- alone, "<digest>  <name>", or BSD's "MD5 (<name>) = <digest>".
+--- alone, "<digest>  <name>", BSD's "MD5 (<name>) = <digest>", or Maven 1's
+--- "<name>: EC 2B 0A ..." with the digest in byte pairs.
 --- @param body string The contents of the file
 --- @param length number The length of the digest in hexadecimal digits
 --- @return string|nil The digest in lower case, or nil if the file has none
@@ -130,6 +135,13 @@ function util:digestIn(body, length)
     for word in body:gmatch("%x+") do
         if #word == length then
             return word:lower()
+        end
+    end
+    local bytes = body:match(":(.*)")
+    if bytes ~= nil then
+        local digest = bytes:gsub("%s", "")
+        if #digest == length and digest:match("^%x+$") then
+            return digest:lower()
         end
     end
     return nil

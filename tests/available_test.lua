@@ -50,6 +50,18 @@ listings[DLCDN .. "maven-2/"] = [[
 <a href="http://maven.apache.org/maven-2.x-eol.html">Maven 2 end of life</a>
 </body></html>
 ]]
+listings[DLCDN .. "maven-1/"] = [[
+<html><body>
+<a href="../">../</a>
+<a href="http://maven.apache.org/maven-1.x-eol.html">Maven 1 end of life</a>
+</body></html>
+]]
+listings[ARCHIVE .. "maven-1/"] = [[
+<html><body>
+<a href="../">../</a>
+<a href="1.1/">1.1/</a>
+</body></html>
+]]
 
 -- archive.apache.org keeps every release, the old ones too. Some are listed twice.
 listings[ARCHIVE .. "maven-4/"] = [[
@@ -80,13 +92,13 @@ listings[ARCHIVE .. "maven-2/"] = [[
 
 -- Every release of both sources, once each, newest first: 4.0.0-rc-7 is after the
 -- alpha releases, 4.0.0-alpha-10 after alpha-2, 3.10.1 after 3.10.0, 3.9.16 after
--- 3.5.0-beta-1, and 2.2.1 after 2.0.11.
+-- 3.5.0-beta-1, 2.2.1 after 2.0.11, and 1.1 comes last.
 local versions = plugin:Available({})
 local got = {}
 for i, v in ipairs(versions) do
     got[i] = v.version
 end
-local want = "4.0.0-rc-7,4.0.0-alpha-10,4.0.0-alpha-2,3.10.1,3.10.0,3.9.16,3.5.0-beta-1,3.0.5,2.2.1,2.0.11"
+local want = "4.0.0-rc-7,4.0.0-alpha-10,4.0.0-alpha-2,3.10.1,3.10.0,3.9.16,3.5.0-beta-1,3.0.5,2.2.1,2.0.11,1.1"
 assert(table.concat(got, ",") == want, table.concat(got, ","))
 
 print("PASS: Available lists the releases of both sources, newest first, each once")

@@ -119,8 +119,18 @@ fails("3.10.1", "dial tcp: i/o timeout")
 -- A release that neither source has: it is not listed, and has no checksum at the archive.
 fails("4.0.0-alpha-99", "Maven 4.0.0-alpha-99 has no checksum file at " .. ARCHIVE)
 
--- Only Maven 2, 3 and 4 are known. Maven 1 is not.
-fails("1.1", "invalid version: 1.1")
+-- Maven 1 has a layout of its own, and its only checksum is a .md5 that writes the
+-- digest in byte pairs after the file name.
+local MAVEN_1_MD5 = ARCHIVE .. "maven-1/1.1/binaries/maven-1.1.tar.gz.md5"
+answers[MAVEN_1_MD5] = "maven-1.1.tar.gz: EC 2B 0A D8 C7 8B A5 24  97 F6 3E E7 F6 13 B5 26\n"
+result = plugin:PreInstall({ version = "1.1" })
+assert(result.version == "1.1", result.version)
+assert(result.url == ARCHIVE .. "maven-1/1.1/binaries/maven-1.1.tar.gz", result.url)
+assert(result.md5 == "ec2b0ad8c78ba52497f63ee7f613b526", result.md5)
+cases = cases + 1
+
+-- Only Maven 1 to 4 are known.
+fails("0.9", "invalid version: 0.9")
 fails("abc", "invalid version: abc")
 fails("", "invalid version: ")
 
