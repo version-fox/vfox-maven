@@ -12,3 +12,15 @@ What changed in each release, as a user notices it. GitHub's release pages list 
 - `vfox link --detect maven` adopts the Mavens that are already on the machine: `M2_HOME` and `MAVEN_HOME`, the system package, Homebrew, SDKMAN, asdf, mise, Scoop and Chocolatey. See [link.md](link.md).
 - A listing that cannot be read stops the search with its HTTP status, not with an internal Lua error.
 - `vfox search maven` lists the stable releases first, then the pre-releases, each newest first. So `vfox install maven@latest` installs the newest stable release, not a pre-release such as `4.0.0-rc-7`. Pre-releases stay listed. See [versions.md](versions.md).
+
+## 0.1.2 (2026-01-19)
+
+- Maven versions are listed and downloaded from dlcdn.apache.org instead of archive.apache.org. dlcdn.apache.org lists only the current releases, so the older releases that only archive.apache.org keeps are no longer listed, and cannot be installed. 0.1.3 lists and installs them again.
+
+## 0.1.1 (2024-04-01)
+
+- The manifest now gives the plugin ZIP's download address as `maven-<version>.zip`, the name the release publishes. 0.1.0 gave `maven_<version>.zip`, a file the release did not have.
+
+## 0.1.0 (2024-03-28)
+
+- The first release. `vfox search maven` lists the Maven 3 and Maven 4 releases on archive.apache.org. `vfox install maven@<version>` downloads the release, and vfox checks it against the checksum that Apache publishes beside the archive. The `bin` directory of the release goes on `PATH`.
